@@ -149,6 +149,7 @@
     <ClCompile Include="BVHObject.cpp" />
     <ClCompile Include="Field.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PBD_Cloth.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BVHObject.h" />
@@ -156,6 +157,7 @@
     <ClInclude Include="Field.h" />
     <ClInclude Include="FlyingCam.h" />
     <ClInclude Include="Joint.h" />
+    <ClInclude Include="PBD_Cloth.h" />
     <ClInclude Include="Vector3.h" />
   </ItemGroup>
   <ItemGroup>

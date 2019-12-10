@@ -37,42 +37,18 @@ const GLfloat  lightPosition[4] = { -5.0f, 10.0f, 10.0f, 1.0f };
 const float    wallSize = 40.0f;
 const float    modelScale = 0.020f;
 
-//Frame & TimeStep Setting
-int       ModelFrameNumber = 0;
+//Frame & TimeStep Setting	[MODEL]
+int      ModelFrameNumber = 0;					
+
+//Frame & TimeStep Setting	[CLOTH]
+float	 timeStep = 1.0f / 60.0f; //1.0/60.0f;
+//float	 currentTime = 0;
+//double	 accumulator = timeStep;
+//float	 startTime = 0, fps = 0;
+
 
 //Model Setting
 string   fileName;
-
-
-void init() {
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glDisable(GL_CULL_FACE);
-	glEnable(GL_NORMALIZE);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glCullFace(GL_BACK);
-	glShadeModel(GL_SMOOTH);
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT, GL_DIFFUSE);
-
-	const GLfloat lightColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	const GLfloat lightAmbient[] = { 0.3f, 0.3f, 0.3f, 1.0f };
-
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
-
-	const GLfloat ambient[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-	const GLfloat specular[] = { 0.4f, 1.0f, 0.4f, 1.0f };
-	const GLfloat shininess[] = { 20.0f };
-
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
-}
-
 
 
 //##################################				LCJ WORKING			###########################################
@@ -139,6 +115,12 @@ void scene(void) {
 void display()
 {
 	//##################################				LCJ WORKING			###########################################
+	//#########		LCJ FRAME ############
+	//float newTime = (float)glutGet(GLUT_ELAPSED_TIME);
+	//frameTime = newTime - currentTime;
+	//currentTime = newTime;
+	//#########		LCJ FRAME ############
+
 	//glMatrixMode(GL_MODELVIEW);
 	//이 부분 카메라 클래스안으로 넣을 필요있음.
 	//카메라 class 안에 fov추가해서 구현하기
@@ -176,6 +158,10 @@ void glut_idle(void) {
 
 	//}
 	//cout << "timeRecorder " << timeRecorder << endl;
+
+	//############# LCJ CLOTH ###############
+	//StepPhysics(timeStep);      //LCJ WORKING 2019.12.10  14:15
+
 	glutPostRedisplay();
 }
 
@@ -214,6 +200,43 @@ void menu(int id)
 
 }
 
+void keyboardCB(unsigned char keyPressed, int x, int y)
+{
+	switch (keyPressed) {
+	case 'q':
+		exit(0);
+		break;
+	}
+	glutPostRedisplay();
+}
+void init() {
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_NORMALIZE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glCullFace(GL_BACK);
+	glShadeModel(GL_SMOOTH);
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT, GL_DIFFUSE);
+
+	const GLfloat lightColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	const GLfloat lightAmbient[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
+
+	const GLfloat ambient[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+	const GLfloat specular[] = { 0.4f, 1.0f, 0.4f, 1.0f };
+	const GLfloat shininess[] = { 20.0f };
+
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+}
 void manual()
 {
 	std::cout << "==================manual=================" << std::endl;
@@ -228,16 +251,6 @@ void manual()
 	std::cout << "=========================================" << std::endl;
 }
 
-
-void keyboardCB(unsigned char keyPressed, int x, int y)
-{
-	switch (keyPressed) {
-	case 'q':
-		exit(0);
-		break;
-	}
-	glutPostRedisplay();
-}
 int main(int argc, const char **argv) {
 	glutInit(&argc, const_cast<char **>(argv));
 	glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
@@ -246,16 +259,16 @@ int main(int argc, const char **argv) {
 	glutCreateWindow("Final Project [Soccer penalty shoot-out]");
 	manual();
 
-	
+
 
 	glutDisplayFunc(display);
 	glutReshapeFunc(ChangeSize);
 	glutIdleFunc(glut_idle);
-		
+
 	glutKeyboardFunc(keyboardCB);
 	glutMouseFunc(processMouse);
 	glutMotionFunc(drag_func);
-	
+
 	glutCreateMenu(menu);
 	glutAddMenuEntry("KickMotion 1", 0);
 	glutAddMenuEntry("KickMotion 2 ", 1);
@@ -264,9 +277,9 @@ int main(int argc, const char **argv) {
 	glutAddMenuEntry("KickMotion 5 ", 4);
 	glutAddMenuEntry("KickMotion 6 ", 5);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
-	
+
 	init();
-		
+
 	glutMainLoop();
 
 	return 0;

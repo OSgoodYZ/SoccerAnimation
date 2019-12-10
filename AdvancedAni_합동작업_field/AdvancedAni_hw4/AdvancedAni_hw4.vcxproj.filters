@@ -24,6 +24,9 @@
     <ClCompile Include="Field.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="PBD_Cloth.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BVHObject.h">
@@ -42,6 +45,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="FlyingCam.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="PBD_Cloth.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
