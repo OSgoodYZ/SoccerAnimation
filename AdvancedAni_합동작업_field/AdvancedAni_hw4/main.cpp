@@ -17,110 +17,62 @@
 #include "BVHObject.h"
 #include "Field.h"
 #include "FlyingCam.h"
+
 using namespace std;
 
+//using class instance
 FlyingCam flyCam;
+BVHObject bvhObject;
+Field field;
 
-namespace {
-    clock_t   timeRecorder;
-    BVHObject bvhObject;
-	Field field;
-    int       frameNumber = 0;
-    int       width       = 1024;
-    int       height      = 768;
-    
+//clock_t   timeRecorder;
 
-    const GLfloat  lightPosition[4] = { - 5.0f, 10.0f, 10.0f, 1.0f };
-    const float    wallSize         = 40.0f;
-    const float    modelScale       = 0.020f;
-   
-}
-
-static bool mouseRotatePressed = false;
-static bool mouseMovePressed   = false;
-static bool mouseZoomPressed   = false;
-static int lastX = 90, lastY = 500, lastZoom = -5;
-
-
-//extern void glut_display(void);
-//extern void glut_reshape(int w, int h);
-extern void glut_idle(void);
-
-
-
+//OpenGL system setting
+int       width = 1024;
+int       height = 768;
 int option = -1;
+
+//Surrounding Setting
+const GLfloat  lightPosition[4] = { -5.0f, 10.0f, 10.0f, 1.0f };
+const float    wallSize = 40.0f;
+const float    modelScale = 0.020f;
+
+//Frame & TimeStep Setting
+int       ModelFrameNumber = 0;
+
+//Model Setting
 string   fileName;
 
 
-
-
-
-
 void init() {
-    
-    glEnable(GL_DEPTH_TEST);
+
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glDisable(GL_CULL_FACE);
 	glEnable(GL_NORMALIZE);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glCullFace(GL_BACK);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glCullFace(GL_BACK);
 	glShadeModel(GL_SMOOTH);
-    glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT, GL_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT, GL_DIFFUSE);
 
-	const GLfloat lightColor[]   = { 1.0f, 1.0f, 1.0f, 1.0f };
+	const GLfloat lightColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	const GLfloat lightAmbient[] = { 0.3f, 0.3f, 0.3f, 1.0f };
-	
+
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
-	
-    const GLfloat ambient[]   = { 0.8f, 0.8f, 0.8f, 1.0f };
-	const GLfloat specular[]  = { 0.4f, 1.0f, 0.4f, 1.0f };
-    const GLfloat shininess[] = { 20.0f };
-    
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
+
+	const GLfloat ambient[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+	const GLfloat specular[] = { 0.4f, 1.0f, 0.4f, 1.0f };
+	const GLfloat shininess[] = { 20.0f };
+
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
 }
 
-void scene(void) {
-    // wall
-    const float size = wallSize;
-    const float d    = size / 10.0f;
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glBegin(GL_QUADS);
-    glNormal3f(0.0f, 1.0f, 0.0f);
-    for (double dx0 = - size; dx0 < size; dx0 += d) {
-        for (double dy0 = - size; dy0 < size; dy0 += d) {
-            double dx1 = dx0 + d, dy1 = dy0 + d;
-            glVertex3f(dx0, 0.0, dy0);
-            glVertex3f(dx0, 0.0, dy1);
-            glVertex3f(dx1, 0.0, dy1);
-            glVertex3f(dx1, 0.0, dy0);
-        }
-    }
-    glEnd();
-
-	glDisable(GL_LIGHTING);
-	
-	field.render();
-	glEnable(GL_LIGHTING);
-	
-    
-    // character
-    if (bvhObject.ready) {
-        const float scale = modelScale;
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glScalef(scale, scale, scale);
-        bvhObject.render(frameNumber);
-        
-        frameNumber = frameNumber+2;
-        frameNumber %= bvhObject.nFrames;
-		cout <<"frameNumber:	" <<frameNumber<<endl;
-    }
-}
 
 
 //##################################				LCJ WORKING			###########################################
@@ -129,7 +81,7 @@ void ChangeSize(GLsizei w, GLsizei h)
 
 	glViewport(0, 0, w, h);
 
-	width  = w;
+	width = w;
 	height = h;
 
 	glMatrixMode(GL_PROJECTION);
@@ -139,15 +91,51 @@ void ChangeSize(GLsizei w, GLsizei h)
 	glLoadIdentity();
 }
 void processMouse(int button, int state, int x, int y) {
-		flyCam.FlyingCamCursorUpdate(button, state, x, y);
+	flyCam.FlyingCamCursorUpdate(button, state, x, y);
 }
 void drag_func(int x, int y)
 {
-	
+
 	flyCam.FlyingCamAngleDisUpdate(x, y);
 	glutPostRedisplay();
 }
 
+void scene(void) {
+	// wall
+	const float size = wallSize;
+	const float d = size / 10.0f;
+	glColor3f(0.0f, 1.0f, 0.0f);
+	glBegin(GL_QUADS);
+	glNormal3f(0.0f, 1.0f, 0.0f);
+	for (double dx0 = -size; dx0 < size; dx0 += d) {
+		for (double dy0 = -size; dy0 < size; dy0 += d) {
+			double dx1 = dx0 + d, dy1 = dy0 + d;
+			glVertex3f(dx0, 0.0, dy0);
+			glVertex3f(dx0, 0.0, dy1);
+			glVertex3f(dx1, 0.0, dy1);
+			glVertex3f(dx1, 0.0, dy0);
+		}
+	}
+	glEnd();
+
+	glDisable(GL_LIGHTING);
+
+	field.render();
+	glEnable(GL_LIGHTING);
+
+
+	// character
+	if (bvhObject.ready) {
+		const float scale = modelScale;
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glScalef(scale, scale, scale);
+		bvhObject.render(ModelFrameNumber);
+
+		ModelFrameNumber = ModelFrameNumber + 2;
+		ModelFrameNumber %= bvhObject.nFrames;
+		cout << "ModelFrameNumber:	" << ModelFrameNumber << endl;
+	}
+}
 void display()
 {
 	//##################################				LCJ WORKING			###########################################
@@ -168,59 +156,61 @@ void display()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	//##################################				LCJ WORKING			###########################################
-	
-	
+
+
 	glColor3f(0.4, 0.4, 0.4);
-    
-    scene();
-	
+
+	scene();
+
 	glutSwapBuffers();
-	glutPostRedisplay();
+	//glutPostRedisplay();
 }
 
 
 
 void glut_idle(void) {
-    clock_t targetInterval = static_cast<clock_t>(1000.0 * 1000.0 * bvhObject.interval);
-    if (clock() - timeRecorder > targetInterval) {
-       // glutPostRedisplay();
-        timeRecorder = clock();
-		cout << timeRecorder << endl;
-    }
+	//clock_t targetInterval = static_cast<clock_t>(1000.0 * 1000.0 * bvhObject.interval);
+	//if (clock() - timeRecorder > targetInterval) {
+	//    //glutPostRedisplay();
+	//    timeRecorder = clock();
+
+	//}
+	//cout << "timeRecorder " << timeRecorder << endl;
+	glutPostRedisplay();
 }
 
 
 void menu(int id)
 {
 	option = id;
-    switch (option)
+	switch (option)
 	{
-        case 0:
-            fileName = string("BVH_Data/1001.bvh");
-            bvhObject.init(fileName);
-        break;
-        case 1:
-            fileName = string("BVH_Data/1002.bvh");
-            bvhObject.init(fileName);
-        break;
-        case 2:
-            fileName = string("BVH_Data/1003.bvh");
-            bvhObject.init(fileName);
-        break;
-        case 3:
-            fileName = string("BVH_Data/1005.bvh");
-            bvhObject.init(fileName);
-        break;
-        case 4:
-            fileName = string("BVH_Data/1006.bvh");
-            bvhObject.init(fileName);
-        break;
-        case 5:
-            fileName = string("BVH_Data/1101.bvh");
-            bvhObject.init(fileName);
-        break;
+	case 0:
+		fileName = string("BVH_Data/1001.bvh");
+		bvhObject.init(fileName);
+		break;
+	case 1:
+		fileName = string("BVH_Data/1002.bvh");
+		bvhObject.init(fileName);
+		break;
+	case 2:
+		fileName = string("BVH_Data/1003.bvh");
+		bvhObject.init(fileName);
+		break;
+	case 3:
+		fileName = string("BVH_Data/1005.bvh");
+		bvhObject.init(fileName);
+		break;
+	case 4:
+		fileName = string("BVH_Data/1006.bvh");
+		bvhObject.init(fileName);
+		break;
+	case 5:
+		fileName = string("BVH_Data/1101.bvh");
+		bvhObject.init(fileName);
+		break;
 
-    }
+	}
 
 }
 
@@ -228,8 +218,8 @@ void manual()
 {
 	std::cout << "==================manual=================" << std::endl;
 	std::cout << std::endl;
-    std::cout << "   START   :  right click and select bvh" << std::endl;
-    std::cout << "   EXIT    :  press 'q' key "<< std::endl;
+	std::cout << "   START   :  right click and select bvh" << std::endl;
+	std::cout << "   EXIT    :  press 'q' key " << std::endl;
 	std::cout << "  Rotate   :  left click & drag" << std::endl;
 	std::cout << "   Zoom    :  ctrl + left click & drag" << std::endl;
 	std::cout << " Translate :  middle click & drag" << std::endl;
@@ -249,40 +239,35 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 	glutPostRedisplay();
 }
 int main(int argc, const char **argv) {
-    glutInit(&argc, const_cast<char **>(argv));
-    glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
-    glutInitWindowSize(width, height);
-    glutInitWindowPosition(0, 0);
-    glutCreateWindow("Project");
-    manual();
-    glutDisplayFunc(display);
-    
+	glutInit(&argc, const_cast<char **>(argv));
+	glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
+	glutInitWindowSize(width, height);
+	glutInitWindowPosition(0, 0);
+	glutCreateWindow("Final Project [Soccer penalty shoot-out]");
+	manual();
 
 	
-    glutIdleFunc(glut_idle);
-	
-	//##################################				LCJ WORKING	cam		###########################################
+
+	glutDisplayFunc(display);
 	glutReshapeFunc(ChangeSize);
+	glutIdleFunc(glut_idle);
+		
 	glutKeyboardFunc(keyboardCB);
 	glutMouseFunc(processMouse);
 	glutMotionFunc(drag_func);
-	//##################################				LCJ WORKING	cam		###########################################
-    
-	init();
-    
-    glutCreateMenu(menu);
-    glutAddMenuEntry("KickMotion 1", 0);
+	
+	glutCreateMenu(menu);
+	glutAddMenuEntry("KickMotion 1", 0);
 	glutAddMenuEntry("KickMotion 2 ", 1);
-    glutAddMenuEntry("KickMotion 3 ", 2);
-    glutAddMenuEntry("KickMotion 4 ", 3);
+	glutAddMenuEntry("KickMotion 3 ", 2);
+	glutAddMenuEntry("KickMotion 4 ", 3);
 	glutAddMenuEntry("KickMotion 5 ", 4);
-    glutAddMenuEntry("KickMotion 6 ", 5);
-    glutAttachMenu(GLUT_RIGHT_BUTTON);
+	glutAddMenuEntry("KickMotion 6 ", 5);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
+	
+	init();
+		
+	glutMainLoop();
 
-
-    timeRecorder = clock();
-    
-    glutMainLoop();
-    
-    return 0;
+	return 0;
 }
