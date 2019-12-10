@@ -41,5 +41,5 @@ public:
     ~BVHObject();
 private:
     void renderJoint(Index joint, Pose pose);
-    void renderBone(Vector3d position0, Vector3d position1);
+    void renderBone(JH::Vector3d position0, JH::Vector3d position1);
 };

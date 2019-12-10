@@ -8,6 +8,9 @@
 using namespace std;
 using namespace Eigen;
 
+#define PI 3.1415926536f
+#define EPSILON  0.0000001f
+
 struct DistanceConstraint { int p1, p2;   float rest_length, k; float k_prime; };
 struct BendingConstraint { int p1, p2, p3;   float rest_length, w, k; float k_prime; };
 
@@ -22,16 +25,27 @@ public:
 	int getIndex(int i, int j) {return j * (numX + 1) + i;	}
 
 	void StepPhysics(float dt);
-	
+	void ComputeForces();
+	void IntegrateExplicitWithDamping(float deltaTime);
+	void Integrate(float deltaTime);
+
 	float GetArea(int a, int b, int c);
 	Vector3f GetNormal(int ind0, int ind1, int ind2);
 	
 	void AddDistanceConstraint(int a, int b, float k);
 	void AddBendingConstraint(int pa, int pb, int pc, float k);
+	void UpdateDistanceConstraint(int i);
+	void UpdateBendingConstraint(int index);
+
 	void DrawCloth();
 
+	void GroundCollision();
+	//void EllipsoidCollision();
+	void UpdateExternalConstraints();
+	void UpdateInternalConstraints(float deltaTime);
+
 	int numX = 20, numY = 20; //these ar the number of quads
-	size_t total_points = (numX + 1)*(numY + 1);
+	int total_points = (numX + 1)*(numY + 1);
 	int sizeCJ = 4;
 	float hsize = sizeCJ / 2.0f;
 

@@ -12,7 +12,9 @@
 //when window setting is
 #include <ctime>
 //when window setting is
+
 #include <GL/glut.h>
+
 
 #include "BVHObject.h"
 #include "Field.h"
@@ -21,8 +23,7 @@
 
 using namespace std;
 
-#define PI 3.1415926536f
-#define EPSILON  0.0000001f
+
 
 //using class instance
 FlyingCam flyCam;
@@ -166,9 +167,11 @@ void glut_idle(void) {
 	//cout << "timeRecorder " << timeRecorder << endl;
 
 	//############# LCJ CLOTH ###############
-	//StepPhysics(timeStep);      //LCJ WORKING 2019.12.10  14:15
+	GoalNet.StepPhysics(timeStep); //LCJ WORKING 2019.12.10  14:15
+	
 
 	glutPostRedisplay();
+	//Sleep(5); //TODO
 }
 
 
@@ -286,6 +289,7 @@ int main(int argc, const char **argv) {
 	glutAddMenuEntry("KickMotion 6 ", 5);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
+	//glewInit();
 	init();
 
 	glutMainLoop();

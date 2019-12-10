@@ -10,6 +10,13 @@ PBD_Cloth::PBD_Cloth()
 
 	solver_iterations = 2;
 
+	kBend = 0.5f;
+	kStretch = 0.25f;
+	kDamp = 0.00125f;
+	gravity = Vector3f(0.0f, -0.00981f, 0.0f);
+
+	selected_index = -1;
+	global_dampening = 0.98f;
 }
 
 PBD_Cloth::~PBD_Cloth()
@@ -39,7 +46,12 @@ void PBD_Cloth::initialization()
 			pos[count++] = Vector3f(((float(i) / (u - 1)) * 2 - 1)* hsize, sizeCJ + 1, ((float(j) / (v - 1))* sizeCJ));
 		}
 	}
+	for (i = 0; i < total_points; i++)
+	{
 
+		vel[i] = Vector3f(0, 0, 0);
+	}
+	
 	///DevO: 24.07.2011
 	W.resize(total_points);
 	for (i = 0; i < total_points; i++) {
@@ -144,6 +156,14 @@ void PBD_Cloth::initialization()
 
 void PBD_Cloth::StepPhysics(float dt)
 {
+	ComputeForces();
+	IntegrateExplicitWithDamping(dt);
+
+	// for collision constraints
+	UpdateInternalConstraints(dt);
+	UpdateExternalConstraints();
+
+	Integrate(dt);
 
 }
 float PBD_Cloth::GetArea(int a, int b, int c)
@@ -243,4 +263,198 @@ void PBD_Cloth::OnShutdown()
 	W.clear();
 	tmp_pos.clear();
 	Ri.clear();
+}
+void PBD_Cloth::ComputeForces() {
+	
+	for (int i = 0; i < total_points; i++) {
+		force[i] = Vector3f(0, 0, 0);
+
+		//add gravity force
+		if (W[i] > 0)
+			force[i] += gravity;
+	}
+}
+void PBD_Cloth::IntegrateExplicitWithDamping(float deltaTime)
+{
+	float deltaTimeMass = deltaTime;
+	size_t i = 0;
+	
+	Vector3f Xcm = Vector3f(0,0,0);
+	Vector3f Vcm = Vector3f(0, 0, 0);
+	float sumM = 0;
+	for (i = 0; i < total_points; i++) {
+
+		
+		vel[i] *= global_dampening; //global velocity dampening !!!      
+		vel[i] = vel[i] + (force[i] * deltaTime)*W[i];
+
+		//calculate the center of mass's position 
+		//and velocity for damping calc
+		Xcm += (pos[i] * mass);
+		Vcm += (vel[i] * mass);
+		sumM += mass;
+	}
+	Xcm /= sumM;
+	Vcm /= sumM;
+	
+	Matrix3f I;
+	I << 1,0,0,
+		 0,1,0,
+		 0,0,1;
+	cout << I << endl;
+	
+	Vector3f L = Vector3f(0, 0, 0);
+	Vector3f w = Vector3f(0, 0, 0);//angular velocity
+
+
+	for (i = 0; i < total_points; i++) {
+		Ri[i] = (pos[i] - Xcm);
+
+		L += Ri[i].cross(mass*vel[i]);
+
+		Matrix3f tmp;
+		tmp << 0, -Ri[i][2], Ri[i][1],
+			   Ri[i][2], 0, -Ri[i][0],
+			   -Ri[i][1], Ri[i][0], 0;
+
+		I += tmp * tmp.transpose() *mass;
+		//I += (tmp*glm::transpose(tmp))*mass;
+	}
+
+	w = I.inverse() *L;
+	
+
+	//apply center of mass damping
+	for (i = 0; i < total_points; i++) {
+		Vector3f delVi = Vcm + w.cross(Ri[i]) - vel[i];
+		vel[i] += kDamp * delVi;
+	}
+
+	//calculate predicted position
+	for (i = 0; i < total_points; i++) {
+		if (W[i] <= 0.0) {
+			tmp_pos[i] = pos[i]; //fixed points
+		}
+		else {
+			tmp_pos[i] = pos[i] + (vel[i] * deltaTime);
+		}
+	}
+}
+
+void PBD_Cloth::Integrate(float deltaTime)
+{
+	float inv_dt = 1.0f / deltaTime;
+	
+	for (int i = 0; i < total_points; i++)
+	{
+		vel[i] = (tmp_pos[i] - pos[i])*inv_dt;
+		pos[i] = tmp_pos[i];
+	}
+}
+
+void PBD_Cloth::UpdateDistanceConstraint(int i)
+{
+
+	DistanceConstraint c = d_constraints[i];
+	Vector3f dir = tmp_pos[c.p1] - tmp_pos[c.p2];
+
+	float len = dir.norm();
+	if (len <= EPSILON)
+		return;
+
+	float w1 = W[c.p1];
+	float w2 = W[c.p2];
+	float invMass = w1 + w2;
+	if (invMass <= EPSILON)
+		return;
+
+	Vector3f dP = (1.0f / invMass) * (len - c.rest_length) * (dir / len)* c.k_prime;
+	if (w1 > 0.0)
+		tmp_pos[c.p1] -= dP * w1;
+
+	if (w2 > 0.0)
+		tmp_pos[c.p2] += dP * w2;
+}
+
+void PBD_Cloth::UpdateBendingConstraint(int index)
+{
+	size_t i = 0;
+	BendingConstraint c = b_constraints[index];
+
+	float global_k = global_dampening * 0.01f;
+	Vector3f center = 0.3333f * (tmp_pos[c.p1] + tmp_pos[c.p2] + tmp_pos[c.p3]);
+	Vector3f dir_center = tmp_pos[c.p3] - center;
+
+	float dist_center = dir_center.norm();
+	//float dist_center = glm::length(dir_center);
+
+	float diff = 1.0f - ((global_k + c.rest_length) / dist_center);
+	Vector3f dir_force = dir_center * diff;
+	Vector3f fa = c.k_prime * ((2.0f*W[c.p1]) / c.w) * dir_force;
+	Vector3f fb = c.k_prime * ((2.0f*W[c.p2]) / c.w) * dir_force;
+	Vector3f fc = -c.k_prime * ((4.0f*W[c.p3]) / c.w) * dir_force;
+
+	if (W[c.p1] > 0.0) {
+		tmp_pos[c.p1] += fa;
+	}
+	if (W[c.p2] > 0.0) {
+		tmp_pos[c.p2] += fb;
+	}
+	if (W[c.p3] > 0.0) {
+		tmp_pos[c.p3] += fc;
+	}
+}
+void PBD_Cloth::GroundCollision() //DevO: 24.07.2011
+{
+	for (int i = 0; i < total_points; i++) {
+		if (tmp_pos[i][1] < 0) //collision with ground  axis y
+			tmp_pos[i][1] = 0;
+	}
+}
+
+//void PBD_Cloth::EllipsoidCollision() 
+//{
+//	for (size_t i = 0; i < total_points; i++) {
+//		glm::vec4 X_0 = (inverse_ellipsoid*glm::vec4(tmp_X[i], 1));
+//		glm::vec3 delta0 = glm::vec3(X_0.x, X_0.y, X_0.z) - center;
+//		float distance = glm::length(delta0);
+//		if (distance < 1.0f) {
+//			delta0 = (radius - distance) * delta0 / distance;
+//
+//			// Transform the delta back to original space
+//			glm::vec3 delta;
+//			glm::vec3 transformInv;
+//			transformInv = glm::vec3(ellipsoid[0].x, ellipsoid[1].x, ellipsoid[2].x);
+//			transformInv /= glm::dot(transformInv, transformInv);
+//			delta.x = glm::dot(delta0, transformInv);
+//			transformInv = glm::vec3(ellipsoid[0].y, ellipsoid[1].y, ellipsoid[2].y);
+//			transformInv /= glm::dot(transformInv, transformInv);
+//			delta.y = glm::dot(delta0, transformInv);
+//			transformInv = glm::vec3(ellipsoid[0].z, ellipsoid[1].z, ellipsoid[2].z);
+//			transformInv /= glm::dot(transformInv, transformInv);
+//			delta.z = glm::dot(delta0, transformInv);
+//			tmp_X[i] += delta;
+//			V[i] = glm::vec3(0);
+//		}
+//	}
+//}
+void PBD_Cloth::UpdateExternalConstraints()
+{
+	int temp = 0;
+	//EllipsoidCollision();
+}
+void PBD_Cloth::UpdateInternalConstraints(float deltaTime)
+{
+	size_t i = 0;
+
+	//printf(" UpdateInternalConstraints \n ");
+	for (size_t si = 0; si < solver_iterations; ++si) {
+		for (i = 0; i < d_constraints.size(); i++) {
+			UpdateDistanceConstraint(i);
+		}
+		for (i = 0; i < b_constraints.size(); i++) {
+			UpdateBendingConstraint(i);
+		}
+		GroundCollision();
+	}
 }
