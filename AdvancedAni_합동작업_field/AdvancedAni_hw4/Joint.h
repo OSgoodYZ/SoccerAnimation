@@ -4,8 +4,10 @@
 #include <vector>
 #include <string>
 #include "Vector3.h"
+//#include <Eigen/Dense>
 
-
+//using namespace Eigen;
+using namespace JH;
 class BVHObject;
 
 class Joint {

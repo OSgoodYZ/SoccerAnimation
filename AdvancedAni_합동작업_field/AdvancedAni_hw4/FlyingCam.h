@@ -3,6 +3,7 @@
 #include <GL/glut.h>
 #include "Vector3.h"
 
+
 class FlyingCam
 {
 public:
@@ -21,9 +22,9 @@ public:
 	float dist = -25;				 //Initial FlyingCam displacement
 
 	//FlyingCam
-	Vector3d Up = Vector3d(0, 1, 0);		//for picking
-	Vector3d Right;
-	Vector3d viewDir;
+	JH::Vector3d Up = JH::Vector3d(0, 1, 0);		//for picking
+	JH::Vector3d Right;
+	JH::Vector3d viewDir;
 private:
 
 };

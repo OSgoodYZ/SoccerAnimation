@@ -12,6 +12,7 @@
 #include "Joint.h"
 #include "Channel.h"
 
+
 class BVHObject {
     typedef int                 Index;
     typedef std::vector<double> Pose;

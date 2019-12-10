@@ -17,13 +17,18 @@
 #include "BVHObject.h"
 #include "Field.h"
 #include "FlyingCam.h"
+#include "PBD_Cloth.h"
 
 using namespace std;
+
+#define PI 3.1415926536f
+#define EPSILON  0.0000001f
 
 //using class instance
 FlyingCam flyCam;
 BVHObject bvhObject;
 Field field;
+PBD_Cloth GoalNet;
 
 //clock_t   timeRecorder;
 
@@ -144,6 +149,7 @@ void display()
 
 	scene();
 
+	GoalNet.DrawCloth();
 	glutSwapBuffers();
 	//glutPostRedisplay();
 }
@@ -210,6 +216,7 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 	glutPostRedisplay();
 }
 void init() {
+	GoalNet.initialization();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
@@ -252,6 +259,7 @@ void manual()
 }
 
 int main(int argc, const char **argv) {
+
 	glutInit(&argc, const_cast<char **>(argv));
 	glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
 	glutInitWindowSize(width, height);

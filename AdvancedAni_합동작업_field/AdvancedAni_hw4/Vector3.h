@@ -12,6 +12,9 @@
 #include <iostream>
 #include <limits>
 
+namespace JH {
+
+
 class Vector3d {
 public:
     typedef double value_type;
@@ -129,3 +132,4 @@ public:
             };
             
             
+}
