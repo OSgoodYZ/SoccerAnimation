@@ -1,10 +1,7 @@
-﻿  BVHObject.cpp
-  Field.cpp
-  main.cpp
-  PBD_Cloth.cpp
+﻿  PBD_Cloth.cpp
   코드를 생성하고 있습니다.
-  2446 of 2456 functions (99.6%) were compiled, the rest were copied from previous compilation.
-    1777 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+  3 of 2456 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    4 functions had inline decision re-evaluated but remain unchanged
   코드를 생성했습니다.
   AdvancedAni_hw4.vcxproj -> C:\Users\LeeChangJin\Desktop\FinalProj_Animation\AdvancedAni_합동작업_field\Release\AdvancedAni_hw4.exe

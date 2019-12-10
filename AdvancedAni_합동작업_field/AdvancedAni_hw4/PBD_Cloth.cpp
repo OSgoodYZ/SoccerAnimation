@@ -225,18 +225,30 @@ void PBD_Cloth::DrawCloth()
 	glLoadIdentity();
 
 	glColor3f(1, 1, 1);
-	glBegin(GL_TRIANGLES);
+	//GL_TRIANGLES
+	glBegin(GL_LINES);
 	for (int i = 0; i < indices.size(); i += 3) {
 		Vector3f p1 = pos[indices[i]];
 		Vector3f p2 = pos[indices[i + 1]];
-		Vector3f p3 = pos[indices[i + 2]];
+		//Vector3f p3 = pos[indices[i + 2]];
 		glVertex3f(p1[0], p1[1], p1[2]);
 		glVertex3f(p2[0], p2[1], p2[2]);
-		glVertex3f(p3[0], p3[1], p3[2]);
+		//glVertex3f(p3[0], p3[1], p3[2]);
 	}
 	glEnd();
+	//glBegin(GL_TRIANGLES);
+	//for (int i = 0; i < indices.size(); i += 3) {
+	//	Vector3f p1 = pos[indices[i]];
+	//	Vector3f p2 = pos[indices[i + 1]];
+	//	Vector3f p3 = pos[indices[i + 2]];
+	//	glVertex3f(p1[0], p1[1], p1[2]);
+	//	glVertex3f(p2[0], p2[1], p2[2]);
+	//	glVertex3f(p3[0], p3[1], p3[2]);
+	//}
+	//glEnd();
 
 	glColor3f(1, 0, 0);
+
 	//draw points
 	glBegin(GL_POINTS);
 	for (int i = 0; i < total_points; i++) {
