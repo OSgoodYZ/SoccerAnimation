@@ -47,7 +47,7 @@ const float    modelScale = 0.020f;
 int      ModelFrameNumber = 0;					
 
 //Frame & TimeStep Setting	[CLOTH]
-float	 timeStep = 1.0f / 30.0f; //1.0/60.0f;
+float	 timeStep = 1.0f / 60.0f; //1.0/60.0f;
 //float	 currentTime = 0;
 //double	 accumulator = timeStep;
 //float	 startTime = 0, fps = 0;
