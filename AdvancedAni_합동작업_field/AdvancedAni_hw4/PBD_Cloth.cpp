@@ -2,11 +2,19 @@
 
 PBD_Cloth::PBD_Cloth()
 {
-	numX = 20;
-	numY = 20; 
-	total_points = (numX + 1)*(numY + 1);
-	sizeCJ = 4;
-	hsize = sizeCJ / 2.0f;
+	top_numX = 40;
+	top_numY = 8 ; 
+	
+
+	total_points = (top_numX + 1)*(top_numY + 1) ;
+	
+	GoalNetInterval = 0.25;
+	
+	size_horizon = 10;
+	hsize = size_horizon / 2.0f;
+	
+	size_vertical = 2 ;
+	vsize = size_vertical / 2.0f;
 
 	solver_iterations = 2;
 
@@ -29,10 +37,10 @@ void PBD_Cloth::initialization()
 	size_t i = 0, j = 0, count = 0;
 	int l1 = 0, l2 = 0;
 	float ypos = 7.0f;
-	int v = numY + 1;
-	int u = numX + 1;
+	int v = top_numY + 1;
+	int u = top_numX + 1;
 
-	indices.resize(numX*numY * 2 * 3);
+	indices.resize(top_numX*top_numY * 2 * 3);
 
 	pos.resize(total_points);
 	tmp_pos.resize(total_points);
@@ -40,12 +48,23 @@ void PBD_Cloth::initialization()
 	force.resize(total_points);
 	Ri.resize(total_points);
 
-	//fill in positions
-	for (int j = 0; j <= numY; j++) {
-		for (int i = 0; i <= numX; i++) {
-			pos[count++] = Vector3f(((float(i) / (u - 1)) * 2 - 1)* hsize, sizeCJ + 1, ((float(j) / (v - 1))* sizeCJ));
+	//fill in positions	//TOP LINE
+	for (int j = 0; j <= top_numY; j++) {
+		for (int i = 0; i <= top_numX; i++) {
+			
+			//pos[count++] = Vector3f(((float(i) / (u - 1)) * 2 - 1)* hsize, 4, (((float(j) / (v - 1))*2-1) *vsize));
+			pos[count++] = Vector3f( i*0.25, 4, j*0.25);
 		}
 	}
+	//fill in positions	//Back LINE
+	for (int j = 0; j <= back_numY; j++) {
+		for (int i = 0; i <= back_numX; i++) {
+
+			//pos[count++] = Vector3f(((float(i) / (u - 1)) * 2 - 1)* hsize, 4, (((float(j) / (v - 1))*2-1) *vsize));
+			pos[count++] = Vector3f(i*0.25, 4, j*0.25);
+		}
+	}
+
 	for (i = 0; i < total_points; i++)
 	{
 
@@ -57,22 +76,51 @@ void PBD_Cloth::initialization()
 	for (i = 0; i < total_points; i++) {
 		W[i] = 1.0f / mass;
 	}
-	/// 2 Fixed Points 
-	W[0] = 0.0;
-	W[numX] = 0.0;
+	// 2 Fixed Points 
+	////W[0] = 0.0;
+	//W[top_numX] = 0.0;
+	//top line
+	for (int i = 0; i <= top_numX; i++)//TOP LINE À­(¾Õ)¶óÀÎ constraint
+	{
+		W[i] = 0.0;
+	}
+	//W[82] = 0.0;
+	for (int i = 1; i <= top_numY; i++)//TOP LINE ¿ÞÂÊ ¿·¶óÀÎ constraint
+	{
+		W[i*top_numX +i] = 0.0;
+	}
+	for (int i = 1; i <= top_numY; i++)//TOP LINE ¿À¸¥ÂÊ ¿·¶óÀÎ constraint
+	{
+		W[i*top_numX + i + top_numX] = 0.0;
+	}
+	for (int i = 0; i <= top_numX; i++)//TOP LINE À­(µÞ)¶óÀÎ constraint
+	{
+		W[top_numY*top_numX + top_numY +i] = 0.0;
+	}
+	
+
+	//goal net position 
+	for (int i = 0; i < total_points; i++)
+	{
+		pos[i][0] = pos[i][0] - 5;
+		pos[i][2] = pos[i][2] + 16;
+		//pos[i][1] = 4.0f;//°ñ´ë ³ôÀÌ
+		//pos[i][2] = 16.0f;
+	}
+
 
 	//memcpy(&tmp_pos[0].x, &pos[0].x, sizeof(Vector3f)*total_points);
 
 	//fill in velocities    
 	//memset(&(vel[0].x), 0, total_points * sizeof(Vector3f));
 
-	//fill in indices
+	//fill in indices	top line
 	GLushort* id = &indices[0];
-	for (int i = 0; i < numY; i++) {
-		for (int j = 0; j < numX; j++) {
-			int i0 = i * (numX + 1) + j;
+	for (int i = 0; i < top_numY; i++) {
+		for (int j = 0; j < top_numX; j++) {
+			int i0 = i * (top_numX + 1) + j;
 			int i1 = i0 + 1;
-			int i2 = i0 + (numX + 1);
+			int i2 = i0 + (top_numX + 1);
 			int i3 = i2 + 1;
 			if ((j + i) % 2) {
 				*id++ = i0; *id++ = i2; *id++ = i1;
@@ -107,6 +155,7 @@ void PBD_Cloth::initialization()
 	if (global_dampening > 1)
 		global_dampening = 1;
 
+	//cout << "u" << u << endl;
 	//setup constraints
 	// Horizontal
 	for (l1 = 0; l1 < v; l1++)   // v
@@ -132,14 +181,14 @@ void PBD_Cloth::initialization()
 	// create bending constraints   
 
 //add vertical constraints
-	for (int i = 0; i <= numX; i++) {
-		for (int j = 0; j < numY - 1; j++) {
+	for (int i = 0; i <= top_numX; i++) {
+		for (int j = 0; j < top_numY - 1; j++) {
 			AddBendingConstraint(getIndex(i, j), getIndex(i, (j + 1)), getIndex(i, j + 2), kBend);
 		}
 	}
 	//add horizontal constraints
-	for (int i = 0; i < numX - 1; i++) {
-		for (int j = 0; j <= numY; j++) {
+	for (int i = 0; i < top_numX - 1; i++) {
+		for (int j = 0; j <= top_numY; j++) {
 			AddBendingConstraint(getIndex(i, j), getIndex(i + 1, j), getIndex(i + 2, j), kBend);
 		}
 	}
@@ -313,7 +362,7 @@ void PBD_Cloth::IntegrateExplicitWithDamping(float deltaTime)
 	I << 1,0,0,
 		 0,1,0,
 		 0,0,1;
-	cout << I << endl;
+	
 	
 	Vector3f L = Vector3f(0, 0, 0);
 	Vector3f w = Vector3f(0, 0, 0);//angular velocity

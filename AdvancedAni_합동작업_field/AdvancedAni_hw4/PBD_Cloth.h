@@ -1,5 +1,5 @@
 #pragma once
-//Branch test
+//LCJ_Branch test
 #include <iostream>
 #include <vector>
 #include <Eigen/Dense>
@@ -22,7 +22,7 @@ public:
 	void OnShutdown();
 
 	void initialization();
-	int getIndex(int i, int j) {return j * (numX + 1) + i;	}
+	int getIndex(int i, int j) {return j * (top_numX + 1) + i;	}
 
 	void StepPhysics(float dt);
 	void ComputeForces();
@@ -44,12 +44,15 @@ public:
 	void UpdateExternalConstraints();
 	void UpdateInternalConstraints(float deltaTime);
 
-	int numX = 20, numY = 20; //these ar the number of quads
-	int total_points = (numX + 1)*(numY + 1);
-	int sizeCJ = 4;
-	float hsize = sizeCJ / 2.0f;
+	int top_numX , top_numY; //these ar the number of quads
+	int back_numX, back_numY;
+	int total_points = (top_numX + 1)*(top_numY + 1);
+	int size_horizon = 4;
+	int size_vertical = 4;
+	float hsize = size_horizon / 2.0f;
+	float vsize = size_vertical / 2.0f;
 
-
+	float GoalNetInterval;
 	vector<Vector3f>		 pos;			//predicted position
 	vector<Vector3f>		 tmp_pos;
 	vector<Vector3f>		 vel;
