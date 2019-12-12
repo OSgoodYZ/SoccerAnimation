@@ -8,8 +8,6 @@ PBD_Cloth::PBD_Cloth()
 
 	total_points = (top_numX + 1)*(top_numY + 1) ;
 	
-	
-	
 	size_horizon = 10;
 	hsize = size_horizon / 2.0f;
 	
@@ -301,9 +299,19 @@ void PBD_Cloth::AddBendingConstraint(int pa, int pb, int pc, float k) {
 }
 void PBD_Cloth::DrawCloth()
 {
-	glDisable(GL_LIGHTING);
+	//glDisable(GL_LIGHTING);
 	//draw polygons
-	
+	//glDisable(GL_LIGHTING);
+	glEnable(GL_LIGHTING);
+	const GLfloat ambient[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	const GLfloat specular[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	const GLfloat shininess[] = { 1.0f };
+
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+
+
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
@@ -343,8 +351,8 @@ void PBD_Cloth::DrawCloth()
 	}
 	glEnd();
 	glPopMatrix();
-
-	glEnable(GL_LIGHTING);
+	glDisable(GL_LIGHTING);
+	//glEnable(GL_LIGHTING);
 }
 
 void PBD_Cloth::OnShutdown()

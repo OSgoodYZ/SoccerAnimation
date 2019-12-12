@@ -104,6 +104,24 @@ void Field::renderLines() {
 }
 
 void Field::renderGoal() {
+	glEnable(GL_LIGHTING);
+
+	const GLfloat lightColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	const GLfloat lightAmbient[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+	GLfloat lightPos[] = { -100.0f, 130.0f, 150.0f, 1.0f };    // <3>
+
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);               //
+
+	const GLfloat ambient[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	const GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	const GLfloat shininess[] = { 1.0f };
+
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
     glPushMatrix();
         glTranslatef(-5, 0, width / 2 - outline_offset + move);
         glRotatef(-90, 1, 0, 0); 
@@ -140,6 +158,7 @@ void Field::renderGoal() {
 		gluCylinder(quadObj, 0.1, 0.1, 2, 10, 10);
 
     glPopMatrix();
+	glDisable(GL_LIGHTING);
 }
 
 //Point** Field::getBoundaries() {
