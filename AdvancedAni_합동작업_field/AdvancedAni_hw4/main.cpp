@@ -220,6 +220,7 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 }
 void init() {
 	GoalNet.initialization();
+	GoalNet.initSetting(leftSide);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);

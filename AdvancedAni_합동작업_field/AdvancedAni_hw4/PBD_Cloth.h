@@ -11,6 +11,8 @@ using namespace Eigen;
 #define PI 3.1415926536f
 #define EPSILON  0.0000001f
 
+enum{topSide =0,backSide =1,leftSide = 2,rightSide = 3};
+
 struct DistanceConstraint { int p1, p2;   float rest_length, k; float k_prime; };
 struct BendingConstraint { int p1, p2, p3;   float rest_length, w, k; float k_prime; };
 
@@ -18,10 +20,13 @@ class PBD_Cloth
 {
 public:
 	PBD_Cloth();
+	PBD_Cloth(int numX,int numY, int ClothInterval);
 	~PBD_Cloth();
 	void OnShutdown();
 
 	void initialization();
+	void initSetting(int side);
+
 	int getIndex(int i, int j) {return j * (top_numX + 1) + i;	}
 
 	void StepPhysics(float dt);
@@ -45,7 +50,7 @@ public:
 	void UpdateInternalConstraints(float deltaTime);
 
 	int top_numX , top_numY; //these ar the number of quads
-	int back_numX, back_numY;
+	
 	int total_points = (top_numX + 1)*(top_numY + 1);
 	int size_horizon = 4;
 	int size_vertical = 4;

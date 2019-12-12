@@ -4,11 +4,11 @@ PBD_Cloth::PBD_Cloth()
 {
 	top_numX = 40;
 	top_numY = 8 ; 
-	
+	GoalNetInterval = 0.25;
 
 	total_points = (top_numX + 1)*(top_numY + 1) ;
 	
-	GoalNetInterval = 0.25;
+	
 	
 	size_horizon = 10;
 	hsize = size_horizon / 2.0f;
@@ -25,20 +25,6 @@ PBD_Cloth::PBD_Cloth()
 
 	selected_index = -1;
 	global_dampening = 0.98f;
-}
-
-PBD_Cloth::~PBD_Cloth()
-{
-	OnShutdown();
-}
-void PBD_Cloth::initialization()
-{
-
-	size_t i = 0, j = 0, count = 0;
-	int l1 = 0, l2 = 0;
-	float ypos = 7.0f;
-	int v = top_numY + 1;
-	int u = top_numX + 1;
 
 	indices.resize(top_numX*top_numY * 2 * 3);
 
@@ -47,33 +33,68 @@ void PBD_Cloth::initialization()
 	vel.resize(total_points);
 	force.resize(total_points);
 	Ri.resize(total_points);
+	W.resize(total_points);
+}
+PBD_Cloth::PBD_Cloth(int numX, int numY, int ClothInterval)
+{
+	top_numX = numX;
+	top_numY = numY;
+	GoalNetInterval = ClothInterval;
+
+	total_points = (top_numX + 1)*(top_numY + 1);
+
+	size_horizon = 10;
+	hsize = size_horizon / 2.0f;
+
+	size_vertical = 2;
+	vsize = size_vertical / 2.0f;
+
+	solver_iterations = 2;
+
+	kBend = 0.5f;
+	kStretch = 0.25f;
+	kDamp = 0.00125f;
+	gravity = Vector3f(0.0f, -0.00981f, 0.0f);
+
+	selected_index = -1;
+	global_dampening = 0.98f;
+
+	indices.resize(top_numX*top_numY * 2 * 3);
+
+	pos.resize(total_points);
+	tmp_pos.resize(total_points);
+	vel.resize(total_points);
+	force.resize(total_points);
+	Ri.resize(total_points);
+	W.resize(total_points);
+}
+PBD_Cloth::~PBD_Cloth()
+{
+	OnShutdown();
+}
+void PBD_Cloth::initialization()
+{
 
 	//fill in positions	//TOP LINE
+	int count = 0;
 	for (int j = 0; j <= top_numY; j++) {
 		for (int i = 0; i <= top_numX; i++) {
 			
 			//pos[count++] = Vector3f(((float(i) / (u - 1)) * 2 - 1)* hsize, 4, (((float(j) / (v - 1))*2-1) *vsize));
-			pos[count++] = Vector3f( i*0.25, 4, j*0.25);
-		}
-	}
-	//fill in positions	//Back LINE
-	for (int j = 0; j <= back_numY; j++) {
-		for (int i = 0; i <= back_numX; i++) {
-
-			//pos[count++] = Vector3f(((float(i) / (u - 1)) * 2 - 1)* hsize, 4, (((float(j) / (v - 1))*2-1) *vsize));
-			pos[count++] = Vector3f(i*0.25, 4, j*0.25);
+			pos[count++] = Vector3f( i*0.25 -5, 4, j*0.25+16);
 		}
 	}
 
-	for (i = 0; i < total_points; i++)
+
+	for (int i = 0; i < total_points; i++)
 	{
 
 		vel[i] = Vector3f(0, 0, 0);
 	}
 	
 	///DevO: 24.07.2011
-	W.resize(total_points);
-	for (i = 0; i < total_points; i++) {
+	
+	for (int i = 0; i < total_points; i++) {
 		W[i] = 1.0f / mass;
 	}
 	// 2 Fixed Points 
@@ -99,14 +120,14 @@ void PBD_Cloth::initialization()
 	}
 	
 
-	//goal net position 
-	for (int i = 0; i < total_points; i++)
-	{
-		pos[i][0] = pos[i][0] - 5;
-		pos[i][2] = pos[i][2] + 16;
-		//pos[i][1] = 4.0f;//골대 높이
-		//pos[i][2] = 16.0f;
-	}
+	////goal net position 
+	//for (int i = 0; i < total_points; i++)
+	//{
+	//	pos[i][0] = pos[i][0] - 5;
+	//	pos[i][2] = pos[i][2] + 16;
+	//	//pos[i][1] = 4.0f;//골대 높이
+	//	//pos[i][2] = 16.0f;
+	//}
 
 
 	//memcpy(&tmp_pos[0].x, &pos[0].x, sizeof(Vector3f)*total_points);
@@ -135,7 +156,7 @@ void PBD_Cloth::initialization()
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	//glPolygonMode(GL_BACK, GL_LINE);
-	glPointSize(5);
+	glPointSize(1);
 
 	//wglSwapIntervalEXT(0); //for 수직 동기화
 
@@ -157,22 +178,25 @@ void PBD_Cloth::initialization()
 
 	//cout << "u" << u << endl;
 	//setup constraints
+	int v = top_numY + 1;
+	int u = top_numX + 1;
+
 	// Horizontal
-	for (l1 = 0; l1 < v; l1++)   // v
-		for (l2 = 0; l2 < (u - 1); l2++) {
+	for (int l1 = 0; l1 < v; l1++)   // v
+		for (int l2 = 0; l2 < (u - 1); l2++) {
 			AddDistanceConstraint((l1 * u) + l2, (l1 * u) + l2 + 1, kStretch);
 		}
 
 	// Vertical
-	for (l1 = 0; l1 < (u); l1++)
-		for (l2 = 0; l2 < (v - 1); l2++) {
+	for (int l1 = 0; l1 < (u); l1++)
+		for (int l2 = 0; l2 < (v - 1); l2++) {
 			AddDistanceConstraint((l2 * u) + l1, ((l2 + 1) * u) + l1, kStretch);
 		}
 
 
 	// Shearing distance constraint
-	for (l1 = 0; l1 < (v - 1); l1++)
-		for (l2 = 0; l2 < (u - 1); l2++) {
+	for (int l1 = 0; l1 < (v - 1); l1++)
+		for (int l2 = 0; l2 < (u - 1); l2++) {
 			AddDistanceConstraint((l1 * u) + l2, ((l1 + 1) * u) + l2 + 1, kStretch);
 			AddDistanceConstraint(((l1 + 1) * u) + l2, (l1 * u) + l2 + 1, kStretch);
 		}
@@ -202,7 +226,11 @@ void PBD_Cloth::initialization()
 
 
 }
-
+void PBD_Cloth::initSetting(int side)
+{
+	cout << side << endl;
+	side;
+}
 void PBD_Cloth::StepPhysics(float dt)
 {
 	ComputeForces();
