@@ -139,6 +139,14 @@ void Field::renderGoal() {
 		glRotatef(-70, 1, 0, 0); 
 		gluCylinder(quadObj, 0.1, 0.1, 2, 10, 10);
 
+		//glTranslatef(0, 0, 2);
+		glRotatef(-90, 1, 0, 0);
+		gluCylinder(quadObj, 0.1, 0.1, 4, 10, 10);
+
+		glTranslatef(10, 0, 0);
+		glRotatef(0, 1, 0, 0);
+		gluCylinder(quadObj, 0.1, 0.1, 4, 10, 10);
+
     glPopMatrix();
 }
 
