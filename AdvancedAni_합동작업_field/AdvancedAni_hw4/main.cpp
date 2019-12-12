@@ -20,6 +20,7 @@
 #include "Field.h"
 #include "FlyingCam.h"
 #include "PBD_Cloth.h"
+#include "Ball.h"
 
 using namespace std;
 
@@ -29,6 +30,7 @@ using namespace std;
 FlyingCam flyCam;
 BVHObject bvhObject;
 Field field;
+Ball ball;
 PBD_Cloth GoalNet0(40,8,0.25);
 PBD_Cloth GoalNet1(40,16,0.25);
 PBD_Cloth GoalNet2(8, 16, 0.25);
@@ -159,6 +161,8 @@ void display()
 	{
 		(*it)->DrawCloth();;
 	}
+
+	ball.render();
 
 	glutSwapBuffers();
 	//glutPostRedisplay();
