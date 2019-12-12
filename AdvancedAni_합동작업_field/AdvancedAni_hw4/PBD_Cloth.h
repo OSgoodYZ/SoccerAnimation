@@ -24,7 +24,7 @@ public:
 	~PBD_Cloth();
 	void OnShutdown();
 
-	void initialization();
+	void initialization(int side);
 	void initSetting(int side);
 
 	int getIndex(int i, int j) {return j * (top_numX + 1) + i;	}

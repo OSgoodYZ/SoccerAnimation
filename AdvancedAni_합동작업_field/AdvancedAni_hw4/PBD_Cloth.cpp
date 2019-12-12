@@ -72,68 +72,9 @@ PBD_Cloth::~PBD_Cloth()
 {
 	OnShutdown();
 }
-void PBD_Cloth::initialization()
+void PBD_Cloth::initialization(int side)
 {
-
-	//fill in positions	//TOP LINE
-	int count = 0;
-	for (int j = 0; j <= top_numY; j++) {
-		for (int i = 0; i <= top_numX; i++) {
-			
-			//pos[count++] = Vector3f(((float(i) / (u - 1)) * 2 - 1)* hsize, 4, (((float(j) / (v - 1))*2-1) *vsize));
-			pos[count++] = Vector3f( i*0.25 -5, 4, j*0.25+16);
-		}
-	}
-
-
-	for (int i = 0; i < total_points; i++)
-	{
-
-		vel[i] = Vector3f(0, 0, 0);
-	}
-	
-	///DevO: 24.07.2011
-	
-	for (int i = 0; i < total_points; i++) {
-		W[i] = 1.0f / mass;
-	}
-	// 2 Fixed Points 
-	////W[0] = 0.0;
-	//W[top_numX] = 0.0;
-	//top line
-	for (int i = 0; i <= top_numX; i++)//TOP LINE À­(¾Õ)¶óÀÎ constraint
-	{
-		W[i] = 0.0;
-	}
-	//W[82] = 0.0;
-	for (int i = 1; i <= top_numY; i++)//TOP LINE ¿ÞÂÊ ¿·¶óÀÎ constraint
-	{
-		W[i*top_numX +i] = 0.0;
-	}
-	for (int i = 1; i <= top_numY; i++)//TOP LINE ¿À¸¥ÂÊ ¿·¶óÀÎ constraint
-	{
-		W[i*top_numX + i + top_numX] = 0.0;
-	}
-	for (int i = 0; i <= top_numX; i++)//TOP LINE À­(µÞ)¶óÀÎ constraint
-	{
-		W[top_numY*top_numX + top_numY +i] = 0.0;
-	}
-	
-
-	////goal net position 
-	//for (int i = 0; i < total_points; i++)
-	//{
-	//	pos[i][0] = pos[i][0] - 5;
-	//	pos[i][2] = pos[i][2] + 16;
-	//	//pos[i][1] = 4.0f;//°ñ´ë ³ôÀÌ
-	//	//pos[i][2] = 16.0f;
-	//}
-
-
-	//memcpy(&tmp_pos[0].x, &pos[0].x, sizeof(Vector3f)*total_points);
-
-	//fill in velocities    
-	//memset(&(vel[0].x), 0, total_points * sizeof(Vector3f));
+	initSetting(side);
 
 	//fill in indices	top line
 	GLushort* id = &indices[0];
@@ -228,8 +169,74 @@ void PBD_Cloth::initialization()
 }
 void PBD_Cloth::initSetting(int side)
 {
-	cout << side << endl;
-	side;
+	int count = 0;
+	switch (side) {
+	case topSide:
+		//fill in positions	//TOP LINE
+		for (int j = 0; j <= top_numY; j++) {
+			for (int i = 0; i <= top_numX; i++) {
+
+				//pos[count++] = Vector3f(((float(i) / (u - 1)) * 2 - 1)* hsize, 4, (((float(j) / (v - 1))*2-1) *vsize));
+				pos[count++] = Vector3f(i*0.25 - 5, 4, j*0.25 + 16); //(-5,4,16) °ñ´ë ÁÂÃø À§ ÁÂÇ¥
+			}
+		}
+
+
+		break;
+	case backSide:
+		
+		for (int j = 0; j <= top_numY; j++) {
+			for (int i = 0; i <= top_numX; i++) {
+				pos[count++] = Vector3f(i*0.25 - 5, -(j*0.25) +4,  + 18); //(-5,4,18) °ñ´ë ÁÂÃø À§ µÚ ÁÂÇ¥
+			}
+		}
+
+
+		break;
+	case leftSide:
+		for (int j = 0; j <= top_numY; j++) {
+			for (int i = 0; i <= top_numX; i++) {
+				pos[count++] = Vector3f( - 5,  - (j*0.25) + 4, i*0.25 +16); //(-5,4,16) °ñ´ë ÁÂÃø À§ ÁÂÇ¥
+			}
+		}
+		break;
+	case rightSide:
+		for (int j = 0; j <= top_numY; j++) {
+			for (int i = 0; i <= top_numX; i++) {
+				pos[count++] = Vector3f(5, -(j*0.25) + 4, i*0.25 + 16); //(-5,4,16) °ñ´ë ¿ìÃø À§ ÁÂÇ¥
+			}
+		}
+		break;
+
+	}
+
+	for (int i = 0; i < total_points; i++)
+	{
+
+		vel[i] = Vector3f(0, 0, 0);
+	}
+	for (int i = 0; i < total_points; i++) {
+		W[i] = 1.0f / mass;
+	}
+
+	for (int i = 0; i <= top_numX; i++)//TOP LINE À­(¾Õ)¶óÀÎ constraint
+	{
+		W[i] = 0.0;
+	}
+	//W[82] = 0.0;
+	for (int i = 1; i <= top_numY; i++)//TOP LINE ¿ÞÂÊ ¿·¶óÀÎ constraint
+	{
+		W[i*top_numX + i] = 0.0;
+	}
+	for (int i = 1; i <= top_numY; i++)//TOP LINE ¿À¸¥ÂÊ ¿·¶óÀÎ constraint
+	{
+		W[i*top_numX + i + top_numX] = 0.0;
+	}
+	for (int i = 0; i <= top_numX; i++)//TOP LINE À­(µÞ)¶óÀÎ constraint
+	{
+		W[top_numY*top_numX + top_numY + i] = 0.0;
+	}
+
 }
 void PBD_Cloth::StepPhysics(float dt)
 {

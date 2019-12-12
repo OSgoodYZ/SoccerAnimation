@@ -29,7 +29,12 @@ using namespace std;
 FlyingCam flyCam;
 BVHObject bvhObject;
 Field field;
-PBD_Cloth GoalNet;
+PBD_Cloth GoalNet0(40,8,0.25);
+PBD_Cloth GoalNet1(40,16,0.25);
+PBD_Cloth GoalNet2(8, 16, 0.25);
+PBD_Cloth GoalNet3(8, 16, 0.25);
+vector<PBD_Cloth*> GoalNetSet;
+
 
 //clock_t   timeRecorder;
 
@@ -150,7 +155,11 @@ void display()
 
 	scene();
 
-	GoalNet.DrawCloth();
+	for (vector<PBD_Cloth*>::iterator it = GoalNetSet.begin(); it != GoalNetSet.end(); ++it)
+	{
+		(*it)->DrawCloth();;
+	}
+
 	glutSwapBuffers();
 	//glutPostRedisplay();
 }
@@ -167,8 +176,11 @@ void glut_idle(void) {
 	//cout << "timeRecorder " << timeRecorder << endl;
 
 	//############# LCJ CLOTH ###############
-	GoalNet.StepPhysics(timeStep); //LCJ WORKING 2019.12.10  14:15
-	
+	for (vector<PBD_Cloth*>::iterator it = GoalNetSet.begin(); it != GoalNetSet.end(); ++it)
+	{
+		(*it)->StepPhysics(timeStep);
+	}
+
 
 	glutPostRedisplay();
 	//Sleep(5); //TODO
@@ -219,8 +231,14 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 	glutPostRedisplay();
 }
 void init() {
-	GoalNet.initialization();
-	GoalNet.initSetting(leftSide);
+	GoalNet0.initialization(topSide);
+	GoalNetSet.push_back(&GoalNet0);
+	GoalNet1.initialization(backSide);
+	GoalNetSet.push_back(&GoalNet1);
+	GoalNet2.initialization(leftSide);
+	GoalNetSet.push_back(&GoalNet2);
+	GoalNet3.initialization(rightSide);
+	GoalNetSet.push_back(&GoalNet3);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
