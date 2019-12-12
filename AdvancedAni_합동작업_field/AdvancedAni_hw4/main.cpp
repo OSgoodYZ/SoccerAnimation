@@ -29,6 +29,7 @@ using namespace std;
 //using class instance
 FlyingCam flyCam;
 BVHObject bvhObject;
+BVHObject2 bvhObject2;
 Field field;
 Ball ball;
 PBD_Cloth GoalNet0(40,8,0.25);
@@ -48,11 +49,12 @@ int option = -1;
 //Surrounding Setting
 const GLfloat  lightPosition[4] = { -5.0f, 10.0f, 10.0f, 1.0f };
 const float    wallSize = 40.0f;
-const float    modelScale = 0.020f;
+const float    modelScale = 0.015f;
+const float    modelScale2 = 2.300f;
 
 //Frame & TimeStep Setting	[MODEL]
 int      ModelFrameNumber = 0;					
-
+int      ModelFrameNumber2 = 0;
 //Frame & TimeStep Setting	[CLOTH]
 float	 timeStep = 1.0f / 60.0f; //1.0/60.0f;
 //float	 currentTime = 0;
@@ -62,7 +64,7 @@ float	 timeStep = 1.0f / 60.0f; //1.0/60.0f;
 
 //Model Setting
 string   fileName;
-
+string   fileName2;
 
 //##################################				LCJ WORKING			###########################################
 void ChangeSize(GLsizei w, GLsizei h)
@@ -113,16 +115,28 @@ void scene(void) {
 	glEnable(GL_LIGHTING);
 
 
-	// character
+	// character(Kicker)
 	if (bvhObject.ready) {
 		const float scale = modelScale;
 		glColor3f(1.0f, 0.0f, 0.0f);
 		glScalef(scale, scale, scale);
 		bvhObject.render(ModelFrameNumber);
 
-		ModelFrameNumber = ModelFrameNumber + 2;
+		ModelFrameNumber = ModelFrameNumber + 1;
 		ModelFrameNumber %= bvhObject.nFrames;
-		cout << "ModelFrameNumber:	" << ModelFrameNumber << endl;
+		//cout << "ModelFrameNumber:	" << ModelFrameNumber << endl;
+	}
+
+	// character (Keeper)
+	if (bvhObject2.ready) {
+		const float scale2 = modelScale2;
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glScalef(scale2, scale2, scale2);
+		bvhObject2.render(ModelFrameNumber2);
+
+		ModelFrameNumber2 = ModelFrameNumber2 + 1;
+		ModelFrameNumber2 %= bvhObject2.nFrames;
+		//cout << "ModelFrameNumber:	" << ModelFrameNumber2 << endl;
 	}
 }
 void display()
@@ -197,28 +211,43 @@ void menu(int id)
 	switch (option)
 	{
 	case 0:
-		fileName = string("BVH_Data/1001.bvh");
+		fileName = string("BVH_Data/kicker/1001.bvh");
 		bvhObject.init(fileName);
+
+		fileName2 = string("BVH_Data/keeper/keeper_blocking.bvh");
+		bvhObject2.init(fileName2);
+
 		break;
 	case 1:
-		fileName = string("BVH_Data/1002.bvh");
+		fileName = string("BVH_Data/kicker/1002.bvh");
 		bvhObject.init(fileName);
+		fileName2 = string("BVH_Data/keeper/keeper_dive_left.bvh");
+		bvhObject2.init(fileName2);
+
 		break;
 	case 2:
-		fileName = string("BVH_Data/1003.bvh");
+		fileName = string("BVH_Data/kicker/1003.bvh");
 		bvhObject.init(fileName);
+		fileName2 = string("BVH_Data/keeper/keeper_dive_right.bvh");
+		bvhObject2.init(fileName2);
 		break;
 	case 3:
-		fileName = string("BVH_Data/1005.bvh");
+		fileName = string("BVH_Data/kicker/1005.bvh");
 		bvhObject.init(fileName);
+		fileName2 = string("BVH_Data/keeper/keeper_cele.bvh");
+		bvhObject2.init(fileName2);
 		break;
 	case 4:
-		fileName = string("BVH_Data/1006.bvh");
+		fileName = string("BVH_Data/kicker/1006.bvh");
 		bvhObject.init(fileName);
+		fileName2 = string("BVH_Data/keeper/keeper_jump_left.bvh");
+		bvhObject2.init(fileName2);
 		break;
 	case 5:
-		fileName = string("BVH_Data/1101.bvh");
+		fileName = string("BVH_Data/kicker/1101.bvh");
 		bvhObject.init(fileName);
+		fileName2 = string("BVH_Data/keeper/keeper_jump_right.bvh");
+		bvhObject2.init(fileName2);
 		break;
 
 	}
