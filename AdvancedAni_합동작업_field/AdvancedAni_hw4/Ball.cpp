@@ -13,11 +13,12 @@ Ball::Ball() {
 	newVelocity = Vector3f(0, 0, 0);
 }
 
-Ball::Ball(Vector3f p, float r, float m, float f) {
+Ball::Ball(Vector3f p, float r, float m, float f, float b) {
 	radius = r;
 	mass = m;
 	friction = f;
 	startPos = p;
+	bounce = b;
 
 	position = startPos + Vector3f(0, 0, 0);
 	forces = Vector3f(0, 0, 0);

@@ -16,12 +16,13 @@ public:
 	float radius;
 	float mass;
 	float friction;
+	float bounce;
 	Vector3f forces;
 
 	Vector3f gravity = Vector3f(0.0f, -0.00981f, 0.0f);
 
 	Ball();
-	Ball(Vector3f startPos, float radius, float mass, float friction);
+	Ball(Vector3f startPos, float radius, float mass, float friction, float bounce);
 	void render();
 	void updatePosition(float deltaTime);
 	void reset();
