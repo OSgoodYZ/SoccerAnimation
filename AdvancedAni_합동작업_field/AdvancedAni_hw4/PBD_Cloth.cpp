@@ -301,7 +301,8 @@ void PBD_Cloth::AddBendingConstraint(int pa, int pb, int pc, float k) {
 }
 void PBD_Cloth::DrawCloth()
 {
-	glDisable(GL_LIGHTING);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
 	//draw polygons
 	
 	glMatrixMode(GL_MODELVIEW);
@@ -310,6 +311,7 @@ void PBD_Cloth::DrawCloth()
 
 	glColor3f(1, 1, 1);
 	//GL_TRIANGLES
+	glLineWidth(1);
 	glBegin(GL_LINES);
 	for (int i = 0; i < indices.size(); i += 3) {
 		Vector3f p1 = pos[indices[i]];
@@ -331,20 +333,21 @@ void PBD_Cloth::DrawCloth()
 	//}
 	//glEnd();
 
-	glColor3f(1, 0, 0);
+	//glPointSize(5);
+	//glColor3f(1, 0, 0);
 
-	//draw points
-	glBegin(GL_POINTS);
-	for (int i = 0; i < total_points; i++) {
-		Vector3f p = pos[i];
-		int is = (i == selected_index);
-		glColor3f((float)!is, (float)is, (float)is);
-		glVertex3f(p[0], p[1], p[2]);
-	}
-	glEnd();
+	////draw points
+	//glBegin(GL_POINTS);
+	//for (int i = 0; i < total_points; i++) {
+	//	Vector3f p = pos[i];
+	//	int is = (i == selected_index);
+	//	glColor3f((float)!is, (float)is, (float)is);
+	//	glVertex3f(p[0], p[1], p[2]);
+	//}
+	//glEnd();
 	glPopMatrix();
-
-	glEnable(GL_LIGHTING);
+	glDisable(GL_LIGHTING);
+	
 }
 
 void PBD_Cloth::OnShutdown()

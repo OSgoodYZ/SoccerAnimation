@@ -28,6 +28,8 @@ Ball::Ball(Vector3f p, float r, float m, float f, float b) {
 }
 
 void Ball::render() {
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
@@ -37,6 +39,7 @@ void Ball::render() {
 	glutSolidSphere(radius, 20, 20);
 
 	glPopMatrix();
+	glDisable(GL_LIGHTING);
 }
 
 void Ball::reset() {

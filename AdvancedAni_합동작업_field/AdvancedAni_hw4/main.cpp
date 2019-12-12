@@ -47,7 +47,7 @@ int       height = 768;
 int option = -1;
 
 //Surrounding Setting
-const GLfloat  lightPosition[4] = { -5.0f, 10.0f, 10.0f, 1.0f };
+//const GLfloat  lightPosition[4] = { -5.0f, 10.0f, 10.0f, 1.0f };
 const float    wallSize = 40.0f;
 const float    modelScale = 0.015f;
 const float    modelScale2 = 2.300f;
@@ -109,10 +109,14 @@ void scene(void) {
 	}
 	glEnd();
 
-	glDisable(GL_LIGHTING);
 
+	
+	//glEnable(GL_LIGHT0);
+	glDisable(GL_LIGHTING);
 	field.render();
 	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	//glDisable(GL_LIGHT0);
 
 
 	// character(Kicker)
@@ -141,6 +145,8 @@ void scene(void) {
 }
 void display()
 {
+
+
 	//##################################				LCJ WORKING			###########################################
 	//#########		LCJ FRAME ############
 	//float newTime = (float)glutGet(GLUT_ELAPSED_TIME);
@@ -284,20 +290,25 @@ void init() {
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_DIFFUSE);
 
-	const GLfloat lightColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	const GLfloat lightAmbient[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+	const GLfloat lightColor[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+	const GLfloat lightAmbient[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+	float Position[] = { 0.0f, 1000.0f, 10.0f, 1.0f };  //조명 위치
 
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
+	glLightfv(GL_LIGHT0, GL_POSITION, Position);     // 광원 위치 설정
 
-	const GLfloat ambient[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-	const GLfloat specular[] = { 0.4f, 1.0f, 0.4f, 1.0f };
-	const GLfloat shininess[] = { 20.0f };
+	const GLfloat ambient[] = { 0.1f, 0.1f, 0.1f, 0.0f };
+	const GLfloat specular[] = { 0.5f, 0.5f, 0.5f, 0.0f };
+	float diffuse[] = { 0.5f, 0.5f, 0.5f, 0.0f };
+	//const GLfloat shininess[] = { 60.0f };
 
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, specular);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+
+	//glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
 }
 void manual()
 {

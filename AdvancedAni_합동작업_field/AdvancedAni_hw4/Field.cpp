@@ -104,6 +104,8 @@ void Field::renderLines() {
 }
 
 void Field::renderGoal() {
+	glEnable(GL_LIGHTING);
+
     glPushMatrix();
         glTranslatef(-5, 0, width / 2 - outline_offset + move);
         glRotatef(-90, 1, 0, 0); 
@@ -148,6 +150,9 @@ void Field::renderGoal() {
 		gluCylinder(quadObj, 0.1, 0.1, 4, 10, 10);
 
     glPopMatrix();
+	
+	glDisable(GL_LIGHTING);
+		
 }
 
 //Point** Field::getBoundaries() {
