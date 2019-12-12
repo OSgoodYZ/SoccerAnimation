@@ -1,7 +1,9 @@
-﻿  main.cpp
+﻿  Ball.cpp
+  BVHObject.cpp
+  Field.cpp
+  main.cpp
+  PBD_Cloth.cpp
   코드를 생성하고 있습니다.
-  2 of 2552 functions (<0.1%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    30 functions had inline decision re-evaluated but remain unchanged
+  All 2660 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   코드를 생성했습니다.
-  AdvancedAni_hw4.vcxproj -> C:\Users\USER\Documents\SoccerAnimation\AdvancedAni_합동작업_field\Release\AdvancedAni_hw4.exe
+  AdvancedAni_hw4.vcxproj -> C:\Users\LeeChangJin\Desktop\FinalProj_Animation\AdvancedAni_합동작업_field\Release\AdvancedAni_hw4.exe
