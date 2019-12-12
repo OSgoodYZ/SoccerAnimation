@@ -1,5 +1,9 @@
 #include "BVHObject.h"
 
+
+int offset_kicker;
+int offset_keeper;
+
 using namespace std;
 
 namespace {
@@ -263,7 +267,7 @@ void BVHObject::renderJoint(Index joint, Pose pose) {
 
 	if (j.parent < 0) {
 		// if root, translate
-		glTranslated(pose[0], pose[1], pose[2]);
+		glTranslated(pose[0], pose[1], pose[2]+offset_kicker);
 	}
 	else {
 		// if not, translate by offset from the parent
@@ -608,7 +612,7 @@ void BVHObject2::renderJoint(Index joint, Pose pose) {
 
 	if (j.parent < 0) {
 		// if root, translate
-		glTranslated(pose[0], pose[1], pose[2]);
+		glTranslated(-pose[0], pose[1], -pose[2] + offset_keeper); // root z rotation 180 degree
 	}
 	else {
 		// if not, translate by offset from the parent
@@ -619,13 +623,25 @@ void BVHObject2::renderJoint(Index joint, Pose pose) {
 	for (int i = 0; i < j.channels.size(); ++i) {
 		keeper::Channel& channel = channels[j.channels[i]];
 		if (channel.type == keeper::Channel::X_ROTATION) {
-			glRotated(pose[channel.index], 1.0, 0.0, 0.0);
+			if (channel.index == 3)
+				glRotated(-180 - pose[channel.index], 1.0, 0.0, 0.0); // root z rotation 180 degree
+			else {
+				glRotated(pose[channel.index], 1.0, 0.0, 0.0);
+			}
 		}
 		else if (channel.type == keeper::Channel::Y_ROTATION) {
-			glRotated(pose[channel.index], 0.0, 1.0, 0.0);
+			if (channel.index == 4)
+				glRotated(-pose[channel.index], 0.0, 1.0, 0.0); // root z rotation 180 degree
+			else {
+				glRotated(pose[channel.index], 0.0, 1.0, 0.0);
+			}
 		}
 		else if (channel.type == keeper::Channel::Z_ROTATION) {
-			glRotated(pose[channel.index], 0.0, 0.0, 1.0);
+			if (channel.index == 5)
+				glRotated(pose[channel.index] + 180, 0.0, 0.0, 1.0); // root z rotation 180 degree
+			else {
+				glRotated(pose[channel.index], 0.0, 0.0, 1.0);
+			}
 		}
 	}
 

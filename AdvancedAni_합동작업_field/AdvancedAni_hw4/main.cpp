@@ -49,9 +49,10 @@ int option = -1;
 //Surrounding Setting
 const GLfloat  lightPosition[4] = { -5.0f, 10.0f, 10.0f, 1.0f };
 const float    wallSize = 40.0f;
-const float    modelScale = 0.015f;
-const float    modelScale2 = 2.300f;
-
+float    modelScale = 0.015f;
+float    modelScale2 = 2.300f;
+extern int offset_kicker;
+extern int offset_keeper;
 //Frame & TimeStep Setting	[MODEL]
 int      ModelFrameNumber = 0;					
 int      ModelFrameNumber2 = 0;
@@ -117,25 +118,41 @@ void scene(void) {
 
 	// character(Kicker)
 	if (bvhObject.ready) {
-		const float scale = modelScale;
+		float scale = modelScale;
+		glLoadIdentity();
 		glColor3f(1.0f, 0.0f, 0.0f);
 		glScalef(scale, scale, scale);
 		bvhObject.render(ModelFrameNumber);
-
-		ModelFrameNumber = ModelFrameNumber + 1;
-		ModelFrameNumber %= bvhObject.nFrames;
+		if (ModelFrameNumber < (bvhObject.nFrames - 1))
+		{
+			ModelFrameNumber = ModelFrameNumber + 1;
+		}
+		else
+		{
+			ModelFrameNumber = bvhObject.nFrames - 1;
+		}
+		//ModelFrameNumber = ModelFrameNumber + 1;
+		//ModelFrameNumber %= bvhObject.nFrames;
 		//cout << "ModelFrameNumber:	" << ModelFrameNumber << endl;
 	}
 
 	// character (Keeper)
 	if (bvhObject2.ready) {
-		const float scale2 = modelScale2;
+		float scale2 = modelScale2;
+		glLoadIdentity();
 		glColor3f(1.0f, 0.0f, 0.0f);
 		glScalef(scale2, scale2, scale2);
 		bvhObject2.render(ModelFrameNumber2);
-
-		ModelFrameNumber2 = ModelFrameNumber2 + 1;
-		ModelFrameNumber2 %= bvhObject2.nFrames;
+		if (ModelFrameNumber2 < (bvhObject2.nFrames - 1))
+		{
+			ModelFrameNumber2 = ModelFrameNumber2 + 1;
+		}
+		else
+		{
+			ModelFrameNumber2 = bvhObject2.nFrames - 1;
+		}
+		//ModelFrameNumber2 = ModelFrameNumber2 + 1;
+		//ModelFrameNumber2 %= bvhObject2.nFrames;
 		//cout << "ModelFrameNumber:	" << ModelFrameNumber2 << endl;
 	}
 }
@@ -211,17 +228,27 @@ void menu(int id)
 	switch (option)
 	{
 	case 0:
-		fileName = string("BVH_Data/kicker/1001.bvh");
+		fileName = string("BVH_Data/kicker/kicker_ready.bvh"); //kicker
+		ModelFrameNumber = 0;
+		offset_kicker=-400; //init z_p = -198, last z_p = 210
+		modelScale = 0.02f;
 		bvhObject.init(fileName);
 
-		fileName2 = string("BVH_Data/keeper/keeper_blocking.bvh");
+		fileName2 = string("BVH_Data/keeper/keeper_ready.bvh"); //keeper
+		ModelFrameNumber2 = 0;
+		modelScale2 = 0.04f;
+		offset_keeper = 310;
 		bvhObject2.init(fileName2);
-
 		break;
 	case 1:
-		fileName = string("BVH_Data/kicker/1002.bvh");
+		fileName = string("BVH_Data/kicker/fast_1101.bvh");
+		ModelFrameNumber = 0;
+		offset_kicker = 10; // init z_p = -202, last z_p = 80
+		modelScale = 0.02f;
 		bvhObject.init(fileName);
-		fileName2 = string("BVH_Data/keeper/keeper_dive_left.bvh");
+		fileName2 = string("BVH_Data/keeper/keeper_blocking.bvh");
+		//modelScale = 2.300f;
+		ModelFrameNumber2 = 0;
 		bvhObject2.init(fileName2);
 
 		break;
