@@ -19,7 +19,8 @@ PBD_Cloth::PBD_Cloth()
 	solver_iterations = 2;
 
 	kBend = 0.5f;
-	kStretch = 0.25f;
+	//kStretch = 0.25f;
+	kStretch = 0.01f;
 	kDamp = 0.00125f;
 	gravity = Vector3f(0.0f, -0.00981f, 0.0f);
 
@@ -76,7 +77,7 @@ void PBD_Cloth::initialization(int side)
 {
 	initSetting(side);
 
-	//fill in indices	top line
+	
 	GLushort* id = &indices[0];
 	for (int i = 0; i < top_numY; i++) {
 		for (int j = 0; j < top_numX; j++) {
@@ -170,6 +171,16 @@ void PBD_Cloth::initialization(int side)
 void PBD_Cloth::initSetting(int side)
 {
 	int count = 0;
+
+	for (int i = 0; i < total_points; i++)
+	{
+
+		vel[i] = Vector3f(0, 0, 0);
+	}
+	for (int i = 0; i < total_points; i++) {
+		W[i] = 1.0f / mass;
+	}
+
 	switch (side) {
 	case topSide:
 		//fill in positions	//TOP LINE
@@ -183,6 +194,7 @@ void PBD_Cloth::initSetting(int side)
 		for (int i = 0; i <= top_numX; i++)//TOP LINE À­(µÞ)¶óÀÎ constraint
 		{
 			W[top_numY*top_numX + top_numY + i] = 0.0;
+			//cout<< W[top_numY*top_numX + top_numY + i] <<endl;
 		}
 
 		break;
@@ -213,14 +225,7 @@ void PBD_Cloth::initSetting(int side)
 
 	}
 
-	for (int i = 0; i < total_points; i++)
-	{
 
-		vel[i] = Vector3f(0, 0, 0);
-	}
-	for (int i = 0; i < total_points; i++) {
-		W[i] = 1.0f / mass;
-	}
 
 	for (int i = 0; i <= top_numX; i++)//TOP LINE À­(¾Õ)¶óÀÎ constraint
 	{
@@ -289,9 +294,9 @@ void PBD_Cloth::AddBendingConstraint(int pa, int pb, int pc, float k) {
 }
 void PBD_Cloth::DrawCloth()
 {
-	//glDisable(GL_LIGHTING);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
+	glDisable(GL_LIGHTING);
+	//glEnable(GL_LIGHTING);
+	//glEnable(GL_LIGHT0);
 	//draw polygons
 	
 	glMatrixMode(GL_MODELVIEW);
@@ -322,22 +327,22 @@ void PBD_Cloth::DrawCloth()
 	//}
 	//glEnd();
 
-	//glPointSize(5);
-	//glColor3f(1, 0, 0);
+	glPointSize(5);
+	glColor3f(1, 0, 0);
 
-	////draw points
-	//glBegin(GL_POINTS);
-	//for (int i = 0; i < total_points; i++) {
-	//	Vector3f p = pos[i];
-	//	int is = (i == selected_index);
-	//	glColor3f((float)!is, (float)is, (float)is);
-	//	glVertex3f(p[0], p[1], p[2]);
-	//}
-	//glEnd();
+	//draw points
+	glBegin(GL_POINTS);
+	for (int i = 0; i < total_points; i++) {
+		Vector3f p = pos[i];
+		int is = (i == selected_index);
+		glColor3f((float)!is, (float)is, (float)is);
+		glVertex3f(p[0], p[1], p[2]);
+	}
+	glEnd();
 	glPopMatrix();
-	glDisable(GL_LIGHTING);
-	//glEnable(GL_LIGHTING);
-	//glEnable(GL_LIGHT0);
+	//glDisable(GL_LIGHTING);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
 }
 
 void PBD_Cloth::OnShutdown()
@@ -527,40 +532,61 @@ void PBD_Cloth::GroundCollision() //DevO: 24.07.2011
 //		}
 //	}
 //}
-void PBD_Cloth::BallCollision(Ball soccerBall)
+float PBD_Cloth::BallCollision(Ball soccerBall)
 {
-	
+	int numOfCollisionPoint = 0;
+
 	for (size_t i = 0; i < total_points; i++)
 	{
+		float lengSum = 0;
+
 		Vector3f diffBallNetpoint = tmp_pos[i] - soccerBall.getPosition();
 		double distance = (diffBallNetpoint).norm();
 
 		Vector3f unitDiff = diffBallNetpoint.normalized();
 		
 		//diffBallNetpoint.normalize() *distance;
-		if (distance < soccerBall.radius + (EPSILON*100000))
+		if (distance < soccerBall.radius + (EPSILON*1000000)) //Ãæµ¹ÀÌ ÀÖÀ» ¶§
 		{
-			if(W[i] != 0)			tmp_pos[i] = tmp_pos[i] + (unitDiff * (soccerBall.radius + (EPSILON * 100000) - distance));
+			if (W[i] != 0)
+			{
+				tmp_pos[i] = tmp_pos[i] + (unitDiff * (soccerBall.radius + (EPSILON * 100000) - distance));
+				numOfCollisionPoint++;
+			}
+			//int 
+			//int northIndex = i - (top_numX + 1);
+			//int southIndex = i + (top_numX + 1);
+			//int eastIndex = i + 1;
+			//int westIndex = i - 1;
+
+			//if()
+			//tmp_pos[i - top_numX + 1];
+			//lengSum = 
+			
 		}
 	}
+
+
+	return numOfCollisionPoint;
 }
-void PBD_Cloth::UpdateExternalConstraints(Ball soccerBall)
+float PBD_Cloth::UpdateExternalConstraints(Ball soccerBall)
 {
 	int temp = 0;
-	BallCollision(soccerBall);
+	return BallCollision(soccerBall);
 	//EllipsoidCollision();
 }
-void PBD_Cloth::StepPhysics(float dt, Ball soccerBall)
+float PBD_Cloth::StepPhysics(float dt, Ball soccerBall)
 {
+	float collisionCoefficient = 0;
 	ComputeForces();
 	IntegrateExplicitWithDamping(dt);
 
 	// for collision constraints
 	UpdateInternalConstraints(dt);
-	UpdateExternalConstraints(soccerBall);
+	collisionCoefficient = UpdateExternalConstraints(soccerBall);
 
 	Integrate(dt);
-
+	return collisionCoefficient;
 }
 void PBD_Cloth::UpdateInternalConstraints(float deltaTime)
 {

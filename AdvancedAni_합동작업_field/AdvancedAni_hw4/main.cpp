@@ -257,17 +257,34 @@ void glut_idle(void) {
 	//}
 	//cout << "timeRecorder " << timeRecorder << endl;
 
-	////	LCJ 충돌실험
-	//Vector3f veltemp(0, 0.2, 4);
-	//ball.getPosition();
-	//ball.setPosition(ball.getPosition() + veltemp * timeStep);
+	//	LCJ 충돌실험
+	Vector3f veltemp(0, 0.2, 4);
+	ball.getPosition();
+	ball.setPosition(ball.getPosition() + veltemp * timeStep);
 
+	//#############				공의 충돌전 움직임			############################
+
+
+	//#############				공의 충돌전 움직임			############################
+	vector <float> collisionCoefficiet;
+	float sumCollCoeffi = 0.0f;
 	//############# LCJ CLOTH ###############
 	for (vector<PBD_Cloth*>::iterator it = GoalNetSet.begin(); it != GoalNetSet.end(); ++it)
 	{
-		(*it)->StepPhysics(timeStep, ball);
+		collisionCoefficiet.push_back((*it)->StepPhysics(timeStep, ball));
+		
 	}
 
+	while (collisionCoefficiet.empty() != true)
+	{
+		sumCollCoeffi = sumCollCoeffi + collisionCoefficiet[collisionCoefficiet.size() - 1];
+		collisionCoefficiet.pop_back();
+	}
+	cout << sumCollCoeffi << endl;
+	//#############				공의 충돌후 움직임			############################
+
+
+	//#############				공의 충돌후 움직임			############################
 
 	glutPostRedisplay();
 	//Sleep(5); //TODO
