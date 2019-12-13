@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 #include <GL/glut.h>
 
+#include "Ball.h"
 using namespace std;
 using namespace Eigen;
 
@@ -29,7 +30,7 @@ public:
 
 	int getIndex(int i, int j) {return j * (top_numX + 1) + i;	}
 
-	void StepPhysics(float dt);
+	void StepPhysics(float dt, Ball soccerBall);
 	void ComputeForces();
 	void IntegrateExplicitWithDamping(float deltaTime);
 	void Integrate(float deltaTime);
@@ -46,9 +47,10 @@ public:
 
 	void GroundCollision();
 	//void EllipsoidCollision();
-	void UpdateExternalConstraints();
+	void UpdateExternalConstraints(Ball soccerBall);
 	void UpdateInternalConstraints(float deltaTime);
 
+	void BallCollision(Ball soccerBall);
 	int top_numX , top_numY; //these ar the number of quads
 	
 	int total_points = (top_numX + 1)*(top_numY + 1);

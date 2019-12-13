@@ -20,7 +20,7 @@
 #include "Field.h"
 #include "FlyingCam.h"
 #include "PBD_Cloth.h"
-#include "Ball.h"
+
 
 using namespace std;
 
@@ -216,10 +216,15 @@ void glut_idle(void) {
 	//}
 	//cout << "timeRecorder " << timeRecorder << endl;
 
+	////	LCJ 충돌실험
+	//Vector3f veltemp(0, 0.2, 4);
+	//ball.getPosition();
+	//ball.setPosition(ball.getPosition() + veltemp * timeStep);
+
 	//############# LCJ CLOTH ###############
 	for (vector<PBD_Cloth*>::iterator it = GoalNetSet.begin(); it != GoalNetSet.end(); ++it)
 	{
-		(*it)->StepPhysics(timeStep);
+		(*it)->StepPhysics(timeStep, ball);
 	}
 
 

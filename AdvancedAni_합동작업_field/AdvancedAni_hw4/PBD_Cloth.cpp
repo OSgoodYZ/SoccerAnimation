@@ -180,7 +180,10 @@ void PBD_Cloth::initSetting(int side)
 				pos[count++] = Vector3f(i*0.25 - 5, 4, j*0.25 + 16); //(-5,4,16) °ñ´ë ÁÂÃø À§ ÁÂÇ¥
 			}
 		}
-
+		for (int i = 0; i <= top_numX; i++)//TOP LINE À­(µŞ)¶óÀÎ constraint
+		{
+			W[top_numY*top_numX + top_numY + i] = 0.0;
+		}
 
 		break;
 	case backSide:
@@ -232,22 +235,7 @@ void PBD_Cloth::initSetting(int side)
 	{
 		W[i*top_numX + i + top_numX] = 0.0;
 	}
-	for (int i = 0; i <= top_numX; i++)//TOP LINE À­(µŞ)¶óÀÎ constraint
-	{
-		W[top_numY*top_numX + top_numY + i] = 0.0;
-	}
 
-}
-void PBD_Cloth::StepPhysics(float dt)
-{
-	ComputeForces();
-	IntegrateExplicitWithDamping(dt);
-
-	// for collision constraints
-	UpdateInternalConstraints(dt);
-	UpdateExternalConstraints();
-
-	Integrate(dt);
 
 }
 float PBD_Cloth::GetArea(int a, int b, int c)
@@ -312,7 +300,7 @@ void PBD_Cloth::DrawCloth()
 
 	glColor3f(1, 1, 1);
 	//GL_TRIANGLES
-	glLineWidth(1);
+	glLineWidth(0.1);
 	glBegin(GL_LINES);
 	for (int i = 0; i < indices.size(); i += 3) {
 		Vector3f p1 = pos[indices[i]];
@@ -539,10 +527,40 @@ void PBD_Cloth::GroundCollision() //DevO: 24.07.2011
 //		}
 //	}
 //}
-void PBD_Cloth::UpdateExternalConstraints()
+void PBD_Cloth::BallCollision(Ball soccerBall)
+{
+	
+	for (size_t i = 0; i < total_points; i++)
+	{
+		Vector3f diffBallNetpoint = tmp_pos[i] - soccerBall.getPosition();
+		double distance = (diffBallNetpoint).norm();
+
+		Vector3f unitDiff = diffBallNetpoint.normalized();
+		
+		//diffBallNetpoint.normalize() *distance;
+		if (distance < soccerBall.radius + (EPSILON*100000))
+		{
+			if(W[i] != 0)			tmp_pos[i] = tmp_pos[i] + (unitDiff * (soccerBall.radius + (EPSILON * 100000) - distance));
+		}
+	}
+}
+void PBD_Cloth::UpdateExternalConstraints(Ball soccerBall)
 {
 	int temp = 0;
+	BallCollision(soccerBall);
 	//EllipsoidCollision();
+}
+void PBD_Cloth::StepPhysics(float dt, Ball soccerBall)
+{
+	ComputeForces();
+	IntegrateExplicitWithDamping(dt);
+
+	// for collision constraints
+	UpdateInternalConstraints(dt);
+	UpdateExternalConstraints(soccerBall);
+
+	Integrate(dt);
+
 }
 void PBD_Cloth::UpdateInternalConstraints(float deltaTime)
 {

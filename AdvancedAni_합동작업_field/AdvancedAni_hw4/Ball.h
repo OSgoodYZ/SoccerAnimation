@@ -27,6 +27,7 @@ public:
 	void updatePosition(float deltaTime);
 	void reset();
 	void setPosition(Vector3f pos);
+	Vector3f getPosition() { return position; }
 
 private:
 	Vector3f velocity;

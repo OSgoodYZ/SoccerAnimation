@@ -1,7 +1,7 @@
 #include "Ball.h"
 
 Ball::Ball() {
-	radius = 0.2;
+	radius = 0.4;
 	mass = 1;
 	friction = 0.1;
 	startPos = Vector3f(-0.7, radius, 1);
