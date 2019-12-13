@@ -28,18 +28,21 @@ public:
 	int          nChannels;   // equal to channels.size();
 	bool         ready;
 	std::string  name;
-
+	Pose		 save_pose1;
+	Pose		 save_pose2;
 	bool         renderingJoint;
 	bool         renderingBone;
 
 	void clear();
 	void init(std::string fileName);
 	void render(int frameNum);
+	void pose_save1(int frameNum);
+	void pose_save2(int frameNum);
 
 	BVHObject();
 	~BVHObject();
 private:
-	void renderJoint(Index joint, Pose pose);
+	void renderJoint(Index joint, Pose pose, int frameNum);
 	void renderBone(JH::Vector3d position0, JH::Vector3d position1);
 };
 
@@ -59,17 +62,20 @@ public:
 	int          nChannels;   // equal to channels.size();
 	bool         ready;
 	std::string  name;
-
+	Pose		 save_pose1;
+	Pose		 save_pose2;
 	bool         renderingJoint;
 	bool         renderingBone;
 
 	void clear();
 	void init(std::string fileName);
 	void render(int frameNum);
+	void pose_save1(int frameNum);
+	void pose_save2(int frameNum);
 
 	BVHObject2();
 	~BVHObject2();
 private:
-	void renderJoint(Index joint, Pose pose);
+	void renderJoint(Index joint, Pose pose, int frameNum);
 	void renderBone(JH::Vector3d position0, JH::Vector3d position1);
 };

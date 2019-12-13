@@ -1,8 +1,9 @@
 #include "BVHObject.h"
+#include <vector>
+#include <Eigen/Dense>
 
-
-int offset_kicker;
-int offset_keeper;
+int motion_kicker = -1;
+int motion_keeper = -1;
 
 using namespace std;
 
@@ -239,7 +240,15 @@ void BVHObject::render(int frameNum) {
 	Pose   pose = motion[frameNum];
 	Index  rootIndex = 0;
 
-	renderJoint(rootIndex, pose);
+	renderJoint(rootIndex, pose, frameNum);
+}
+
+void BVHObject::pose_save1(int frameNum) {
+	save_pose1 = motion[frameNum];
+}
+
+void BVHObject::pose_save2(int frameNum) {
+	save_pose2 = motion[frameNum];
 }
 
 BVHObject::BVHObject() : ready(false), nFrames(0), interval(0.0), renderingJoint(true), renderingBone(true) {
@@ -256,7 +265,7 @@ BVHObject::~BVHObject() {
 // private
 //////////////////////////////////////
 
-void BVHObject::renderJoint(Index joint, Pose pose) {
+void BVHObject::renderJoint(Index joint, Pose pose, int frameNum) {
 	kicker::Joint& j = joints[joint];
 
 	gluQuadricDrawStyle(quadObj, GLU_FILL);
@@ -265,9 +274,33 @@ void BVHObject::renderJoint(Index joint, Pose pose) {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 
+	float pos_kicker_x = 0, pos_kicker_y = 0, pos_kicker_z = 0;
+
+	//blending 
+	int blending_frame = 10;
+	float blending_ratio = 1;
+
+
+	if (frameNum < blending_frame) {
+		blending_ratio = -0.5 * cos(3.14 / blending_frame * (frameNum + 1)) + 0.5;  // 0frame -> 0
+	}
+	else {
+		blending_ratio = 1;
+	}
+
+
 	if (j.parent < 0) {
 		// if root, translate
-		glTranslated(pose[0], pose[1], pose[2]+offset_kicker);
+		switch (motion_kicker)
+		{
+		case 2:
+
+			pos_kicker_x = save_pose1[0] - save_pose2[0];
+			pos_kicker_y = save_pose1[1] - save_pose2[1];
+			pos_kicker_z = save_pose1[2] - save_pose2[2];
+			break;
+		}
+		glTranslated(pose[0] + pos_kicker_x, pose[1] + pos_kicker_y, pose[2] + pos_kicker_z);
 	}
 	else {
 		// if not, translate by offset from the parent
@@ -278,13 +311,13 @@ void BVHObject::renderJoint(Index joint, Pose pose) {
 	for (int i = 0; i < j.channels.size(); ++i) {
 		kicker::Channel& channel = channels[j.channels[i]];
 		if (channel.type == kicker::Channel::X_ROTATION) {
-			glRotated(pose[channel.index], 1.0, 0.0, 0.0);
+			glRotated(save_pose1[channel.index] * (1 - blending_ratio) + pose[channel.index] * blending_ratio, 1.0, 0.0, 0.0);
 		}
 		else if (channel.type == kicker::Channel::Y_ROTATION) {
-			glRotated(pose[channel.index], 0.0, 1.0, 0.0);
+			glRotated(save_pose1[channel.index] * (1 - blending_ratio) + pose[channel.index] * blending_ratio, 0.0, 1.0, 0.0);
 		}
 		else if (channel.type == kicker::Channel::Z_ROTATION) {
-			glRotated(pose[channel.index], 0.0, 0.0, 1.0);
+			glRotated(save_pose1[channel.index] * (1 - blending_ratio) + pose[channel.index] * blending_ratio, 0.0, 0.0, 1.0);
 		}
 	}
 
@@ -315,7 +348,7 @@ void BVHObject::renderJoint(Index joint, Pose pose) {
 
 	// recursive
 	for (int i = 0; i < j.children.size(); ++i) {
-		renderJoint(j.children[i], pose);
+		renderJoint(j.children[i], pose, frameNum);
 	}
 
 	glPopMatrix();
@@ -588,7 +621,15 @@ void BVHObject2::render(int frameNum) {
 	Pose   pose = motion[frameNum];
 	Index  rootIndex = 0;
 
-	renderJoint(rootIndex, pose);
+	renderJoint(rootIndex, pose, frameNum);
+}
+
+void BVHObject2::pose_save1(int frameNum) {
+	save_pose1 = motion[frameNum];
+}
+
+void BVHObject2::pose_save2(int frameNum) {
+	save_pose2 = motion[frameNum];
 }
 
 BVHObject2::BVHObject2() : ready(false), nFrames(0), interval(0.0), renderingJoint(true), renderingBone(true) {
@@ -605,7 +646,7 @@ BVHObject2::~BVHObject2() {
 // private
 //////////////////////////////////////
 
-void BVHObject2::renderJoint(Index joint, Pose pose) {
+void BVHObject2::renderJoint(Index joint, Pose pose, int frameNum) {
 	keeper::Joint& j = joints[joint];
 
 	gluQuadricDrawStyle(quadObj, GLU_FILL);
@@ -614,9 +655,37 @@ void BVHObject2::renderJoint(Index joint, Pose pose) {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 
+	int blending_frame = 10; //blending
+	float blending_ratio = 1;
+
+	if (frameNum < blending_frame) {
+		blending_ratio = -0.5 * cos(3.14 / blending_frame * (frameNum + 1)) + 0.5;  // 0frame -> 0
+	}
+	else {
+		blending_ratio = 1;
+	}
+
+	float pos_keeper_x = 0, pos_keeper_y = 0, pos_keeper_z = 0;
+
 	if (j.parent < 0) {
 		// if root, translate
-		glTranslated(-pose[0], pose[1], -pose[2] + offset_keeper); // root z rotation 180 degree
+		switch (motion_keeper)
+		{
+		case -1:  //-4.8139 36.7156 -5.6347 ~ -10.0849 36.7335 -14.3680
+			pos_keeper_z = 310;
+			break;
+		case 1: // 38.068699 36.393200 -5.382200  ~ 39.483398 36.247002 -3.139300
+			pos_keeper_x = -save_pose1[0] + save_pose2[0];
+			pos_keeper_y = -save_pose1[1] + save_pose2[1];
+			pos_keeper_z = -save_pose1[2] + save_pose2[2] + 310;
+			break;
+		case 2: // -4.562700 36.605099 -3.237100
+			pos_keeper_x = -save_pose1[0] + save_pose2[0] + 38.068699 + 10.0849;
+			pos_keeper_y = -save_pose1[1] + save_pose2[1];
+			pos_keeper_z = -save_pose1[2] + save_pose2[2] + 310;// +14.3680 - 5.382200;
+			break;
+		}
+		glTranslated(-pose[0] + pos_keeper_x, pose[1] + pos_keeper_y, -pose[2] + pos_keeper_z); // root z rotation 180 degree
 	}
 	else {
 		// if not, translate by offset from the parent
@@ -630,21 +699,21 @@ void BVHObject2::renderJoint(Index joint, Pose pose) {
 			if (channel.index == 3)
 				glRotated(-180 - pose[channel.index], 1.0, 0.0, 0.0); // root z rotation 180 degree
 			else {
-				glRotated(pose[channel.index], 1.0, 0.0, 0.0);
+				glRotated(save_pose1[channel.index] * (1 - blending_ratio) + pose[channel.index] * blending_ratio, 1.0, 0.0, 0.0);
 			}
 		}
 		else if (channel.type == keeper::Channel::Y_ROTATION) {
 			if (channel.index == 4)
 				glRotated(-pose[channel.index], 0.0, 1.0, 0.0); // root z rotation 180 degree
 			else {
-				glRotated(pose[channel.index], 0.0, 1.0, 0.0);
+				glRotated(save_pose1[channel.index] * (1 - blending_ratio) + pose[channel.index] * blending_ratio, 0.0, 1.0, 0.0);
 			}
 		}
 		else if (channel.type == keeper::Channel::Z_ROTATION) {
 			if (channel.index == 5)
 				glRotated(pose[channel.index] + 180, 0.0, 0.0, 1.0); // root z rotation 180 degree
 			else {
-				glRotated(pose[channel.index], 0.0, 0.0, 1.0);
+				glRotated(save_pose1[channel.index] * (1 - blending_ratio) + pose[channel.index] * blending_ratio, 0.0, 0.0, 1.0);
 			}
 		}
 	}
@@ -676,7 +745,7 @@ void BVHObject2::renderJoint(Index joint, Pose pose) {
 
 	// recursive
 	for (int i = 0; i < j.children.size(); ++i) {
-		renderJoint(j.children[i], pose);
+		renderJoint(j.children[i], pose, frameNum);
 	}
 
 	glPopMatrix();

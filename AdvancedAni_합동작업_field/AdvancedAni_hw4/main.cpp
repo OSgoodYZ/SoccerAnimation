@@ -37,7 +37,12 @@ PBD_Cloth GoalNet1(40,16,0.25);
 PBD_Cloth GoalNet2(8, 16, 0.25);
 PBD_Cloth GoalNet3(8, 16, 0.25);
 vector<PBD_Cloth*> GoalNetSet;
-
+clock_t ani_start, ani_time;
+double  animation_time = 0.0f;
+double  update_timer = 0.0f;
+double  update_timer2 = 0.0f;
+double time_scale = 1.0f;
+double time_scale2 = 1.0f;
 
 //clock_t   timeRecorder;
 
@@ -51,8 +56,10 @@ int option = -1;
 const float    wallSize = 40.0f;
 float    modelScale = 0.015f;
 float    modelScale2 = 2.300f;
-extern int offset_kicker;
-extern int offset_keeper;
+
+extern int motion_kicker;
+extern int motion_keeper;
+
 //Frame & TimeStep Setting	[MODEL]
 int      ModelFrameNumber = 0;					
 int      ModelFrameNumber2 = 0;
@@ -66,6 +73,51 @@ float	 timeStep = 1.0f / 60.0f; //1.0/60.0f;
 //Model Setting
 string   fileName;
 string   fileName2;
+
+// display text 
+static void drawString(void* font, const char* str, float x, float y) {
+	int len = strlen(str);
+	glRasterPos2f(x, y);
+	for (int i = 0; i < len; ++i) {
+		glutBitmapCharacter(font, str[i]);  // this function automatically
+											// advances raster position
+	}
+}
+
+// display text 
+static void drawMessage(int line_no, char messages[][64], int num_messages)
+{
+	if (messages == NULL || num_messages <= 0)
+		return;
+
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	gluOrtho2D(0.0, 500, 500, 0.0);
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+
+	glColor3f(0.0, 1.0, 0.0);
+	int y = 24 + 18 * line_no;
+	for (int i = 0; i < num_messages; ++i) {
+		drawString(GLUT_BITMAP_HELVETICA_18, messages[i], 8, y);
+		y += 18;
+	}
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+}
+
+
 
 //##################################				LCJ WORKING			###########################################
 void ChangeSize(GLsizei w, GLsizei h)
@@ -127,17 +179,6 @@ void scene(void) {
 		glColor3f(1.0f, 0.0f, 0.0f);
 		glScalef(scale, scale, scale);
 		bvhObject.render(ModelFrameNumber);
-		if (ModelFrameNumber < (bvhObject.nFrames - 1))
-		{
-			ModelFrameNumber = ModelFrameNumber + 1;
-		}
-		else
-		{
-			ModelFrameNumber = bvhObject.nFrames - 1;
-		}
-		//ModelFrameNumber = ModelFrameNumber + 1;
-		//ModelFrameNumber %= bvhObject.nFrames;
-		//cout << "ModelFrameNumber:	" << ModelFrameNumber << endl;
 	}
 
 	// character (Keeper)
@@ -147,17 +188,6 @@ void scene(void) {
 		glColor3f(1.0f, 0.0f, 0.0f);
 		glScalef(scale2, scale2, scale2);
 		bvhObject2.render(ModelFrameNumber2);
-		if (ModelFrameNumber2 < (bvhObject2.nFrames - 1))
-		{
-			ModelFrameNumber2 = ModelFrameNumber2 + 1;
-		}
-		else
-		{
-			ModelFrameNumber2 = bvhObject2.nFrames - 1;
-		}
-		//ModelFrameNumber2 = ModelFrameNumber2 + 1;
-		//ModelFrameNumber2 %= bvhObject2.nFrames;
-		//cout << "ModelFrameNumber:	" << ModelFrameNumber2 << endl;
 	}
 }
 void display()
@@ -193,6 +223,17 @@ void display()
 	glColor3f(0.4, 0.4, 0.4);
 
 	scene();
+
+	// display text
+	char messages[1][64];
+	if (bvhObject.ready) {
+		sprintf(messages[0], "Shoot :  's' key");
+		drawMessage(0, messages, 1);
+	}
+	else {
+		sprintf(messages[0], "Start : 'i' key");
+		drawMessage(0, messages, 1);
+	}
 
 	for (vector<PBD_Cloth*>::iterator it = GoalNetSet.begin(); it != GoalNetSet.end(); ++it)
 	{
@@ -230,73 +271,114 @@ void glut_idle(void) {
 
 	glutPostRedisplay();
 	//Sleep(5); //TODO
-}
 
+		//############# JJH BVH motion ###############
+	ani_time = clock();
+	float last_time = animation_time;
+	animation_time = (ani_time - ani_start) / (float)CLOCKS_PER_SEC;
+	float dt = animation_time - last_time;
 
-void menu(int id)
-{
-	option = id;
-	switch (option)
-	{
-	case 0:
-		fileName = string("BVH_Data/kicker/kicker_ready.bvh"); //kicker
+	if (bvhObject.ready) {
+		update_timer += time_scale * 2 * dt;
+		if ((ModelFrameNumber + 1) >= bvhObject.nFrames) {
+			if (motion_kicker == 0)
+			{
+				bvhObject.pose_save1(ModelFrameNumber);
+				fileName = string("BVH_Data/kicker/1001_nohand_shoot.bvh");
+				ModelFrameNumber = 0;
+				motion_kicker = 1;
+				time_scale = 1.5f; //bvh speed
+				bvhObject.init(fileName);
+				bvhObject.pose_save2(0);
+			}
+			else if (motion_kicker == 1)
+			{
+				bvhObject.pose_save1(ModelFrameNumber);
+				fileName = string("BVH_Data/kicker/laugh.bvh");
+				ModelFrameNumber = 0;
+				motion_kicker = 2;
+				time_scale = 1.8f; //bvh speed
+				bvhObject.init(fileName);
+				bvhObject.pose_save2(0);
+			}
+		}
+
+		else if (update_timer > bvhObject.interval) {
+			ModelFrameNumber++;
+			update_timer = 0;
+		}
+	}
+	else {
 		ModelFrameNumber = 0;
-		offset_kicker=-400; //init z_p = -198, last z_p = 210
-		modelScale = 0.02f;
-		bvhObject.init(fileName);
-
-		fileName2 = string("BVH_Data/keeper/keeper_ready.bvh"); //keeper
-		ModelFrameNumber2 = 0;
-		modelScale2 = 0.04f;
-		offset_keeper = 310;
-		bvhObject2.init(fileName2);
-		break;
-	case 1:
-		fileName = string("BVH_Data/kicker/fast_1101.bvh");
-		ModelFrameNumber = 0;
-		offset_kicker = 10; // init z_p = -202, last z_p = 80
-		modelScale = 0.02f;
-		bvhObject.init(fileName);
-		fileName2 = string("BVH_Data/keeper/keeper_blocking.bvh");
-		//modelScale = 2.300f;
-		ModelFrameNumber2 = 0;
-		bvhObject2.init(fileName2);
-
-		break;
-	case 2:
-		fileName = string("BVH_Data/kicker/1003.bvh");
-		bvhObject.init(fileName);
-		fileName2 = string("BVH_Data/keeper/keeper_dive_right.bvh");
-		bvhObject2.init(fileName2);
-		break;
-	case 3:
-		fileName = string("BVH_Data/kicker/1005.bvh");
-		bvhObject.init(fileName);
-		fileName2 = string("BVH_Data/keeper/keeper_cele.bvh");
-		bvhObject2.init(fileName2);
-		break;
-	case 4:
-		fileName = string("BVH_Data/kicker/1006.bvh");
-		bvhObject.init(fileName);
-		fileName2 = string("BVH_Data/keeper/keeper_jump_left.bvh");
-		bvhObject2.init(fileName2);
-		break;
-	case 5:
-		fileName = string("BVH_Data/kicker/1101.bvh");
-		bvhObject.init(fileName);
-		fileName2 = string("BVH_Data/keeper/keeper_jump_right.bvh");
-		bvhObject2.init(fileName2);
-		break;
-
 	}
 
+	if (bvhObject2.ready) {
+		update_timer2 += time_scale2 *10.0* dt;
+		if ((ModelFrameNumber2 + 1) >= bvhObject2.nFrames) {
+			if (motion_keeper == 0)
+			{
+				bvhObject2.pose_save1(ModelFrameNumber2);
+				fileName2 = string("BVH_Data/keeper/keeper_blocking_reverse_short.bvh");
+				ModelFrameNumber2 = 0;
+				motion_keeper = 1;
+				time_scale2 = 2.0f; //bvh speed
+				bvhObject2.init(fileName2);
+				bvhObject2.pose_save2(0);
+
+			}
+			else if (motion_keeper == 1)
+			{
+				bvhObject2.pose_save1(ModelFrameNumber2);
+				fileName2 = string("BVH_Data/keeper/keeper_ready2.bvh");
+				ModelFrameNumber2 = 0;
+				motion_keeper = 2;
+				time_scale2 = 1.8f; //bvh speed
+				bvhObject2.init(fileName2);
+				bvhObject2.pose_save2(0);
+			}
+		}
+
+		else if (update_timer2 > bvhObject2.interval) {
+			ModelFrameNumber2++;
+			update_timer2 = 0;
+		}
+	}
+	else {
+		ModelFrameNumber2 = 0;
+	}
 }
+
+
 
 void keyboardCB(unsigned char keyPressed, int x, int y)
 {
 	switch (keyPressed) {
 	case 'q':
 		exit(0);
+		break;
+	case 'i':
+		fileName = string("BVH_Data/kicker/1001_nohand_ready.bvh"); //kicker
+		ModelFrameNumber = 0;
+		//motion_kicker = 0;
+		modelScale = 0.02f;
+		bvhObject.init(fileName);
+		time_scale = 0.6f; //bvh speed
+		bvhObject.pose_save2(0);
+		bvhObject.pose_save1(0);
+
+		fileName2 = string("BVH_Data/keeper/keeper_ready.bvh"); //keeper
+		ModelFrameNumber2 = 0;
+		modelScale2 = 0.04f;
+		time_scale2 = 2.0f;//1.8f; //bvh speed
+
+		bvhObject2.init(fileName2);
+		bvhObject2.pose_save2(0);
+		bvhObject2.pose_save1(0);
+
+		break;
+	case 's':
+		motion_kicker = 0;
+		motion_keeper = 0;
 		break;
 	}
 	glutPostRedisplay();
@@ -346,11 +428,11 @@ void manual()
 {
 	std::cout << "==================manual=================" << std::endl;
 	std::cout << std::endl;
-	std::cout << "   START   :  right click and select bvh" << std::endl;
+	std::cout << "   START   :  i key" << std::endl;
 	std::cout << "   EXIT    :  press 'q' key " << std::endl;
 	std::cout << "  Rotate   :  left click & drag" << std::endl;
-	std::cout << "   Zoom    :  ctrl + left click & drag" << std::endl;
-	std::cout << " Translate :  middle click & drag" << std::endl;
+	std::cout << "   Zoom    :  wheel click & drag" << std::endl;
+	//std::cout << " Translate :  middle click & drag" << std::endl;
 
 	std::cout << std::endl;
 	std::cout << "=========================================" << std::endl;
@@ -375,14 +457,6 @@ int main(int argc, const char **argv) {
 	glutMouseFunc(processMouse);
 	glutMotionFunc(drag_func);
 
-	glutCreateMenu(menu);
-	glutAddMenuEntry("KickMotion 1", 0);
-	glutAddMenuEntry("KickMotion 2 ", 1);
-	glutAddMenuEntry("KickMotion 3 ", 2);
-	glutAddMenuEntry("KickMotion 4 ", 3);
-	glutAddMenuEntry("KickMotion 5 ", 4);
-	glutAddMenuEntry("KickMotion 6 ", 5);
-	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
 	//glewInit();
 	init();
