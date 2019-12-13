@@ -105,7 +105,7 @@ void Field::renderLines() {
 
 void Field::renderGoal() {
 	glEnable(GL_LIGHTING);
-
+	glEnable(GL_LIGHT0);
     glPushMatrix();
         glTranslatef(-5, 0, width / 2 - outline_offset + move);
         glRotatef(-90, 1, 0, 0); 

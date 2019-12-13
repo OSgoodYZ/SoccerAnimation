@@ -301,6 +301,7 @@ void PBD_Cloth::AddBendingConstraint(int pa, int pb, int pc, float k) {
 }
 void PBD_Cloth::DrawCloth()
 {
+	//glDisable(GL_LIGHTING);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	//draw polygons
@@ -347,7 +348,8 @@ void PBD_Cloth::DrawCloth()
 	//glEnd();
 	glPopMatrix();
 	glDisable(GL_LIGHTING);
-	
+	//glEnable(GL_LIGHTING);
+	//glEnable(GL_LIGHT0);
 }
 
 void PBD_Cloth::OnShutdown()

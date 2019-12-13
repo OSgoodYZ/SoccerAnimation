@@ -306,7 +306,11 @@ void BVHObject::renderJoint(Index joint, Pose pose) {
 
 	if (renderingJoint) {
 		glColor3d(1.0, 1.0, 1.0);
+		
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
 		gluSphere(quadObj, 3.0, 12, 12);
+		//glutSolidSphere(3.0, 12, 12);
+		glPopAttrib();
 	}
 
 	// recursive
@@ -663,7 +667,11 @@ void BVHObject2::renderJoint(Index joint, Pose pose) {
 
 	if (renderingJoint) {
 		glColor3d(1.0, 1.0, 1.0);
+		//gluSphere(quadObj, 1.0, 12, 12);
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
 		gluSphere(quadObj, 1.0, 12, 12);
+		//glutSolidSphere(3.0, 12, 12);
+		glPopAttrib();
 	}
 
 	// recursive

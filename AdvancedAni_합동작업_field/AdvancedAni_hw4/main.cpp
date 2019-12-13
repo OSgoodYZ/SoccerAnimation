@@ -329,13 +329,13 @@ void init() {
 	const GLfloat ambient[] = { 0.1f, 0.1f, 0.1f, 0.0f };
 	const GLfloat specular[] = { 0.5f, 0.5f, 0.5f, 0.0f };
 	float diffuse[] = { 0.5f, 0.5f, 0.5f, 0.0f };
-	//const GLfloat shininess[] = { 60.0f };
+	const GLfloat shininess[] = { 60.0f };
 
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, specular);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
 
-	//glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
 }
 void manual()
 {
