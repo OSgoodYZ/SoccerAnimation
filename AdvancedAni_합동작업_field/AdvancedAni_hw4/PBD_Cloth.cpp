@@ -191,11 +191,7 @@ void PBD_Cloth::initSetting(int side)
 				pos[count++] = Vector3f(i*0.25 - 5, 4, j*0.25 + 16); //(-5,4,16) °ñ´ë ÁÂÃø À§ ÁÂÇ¥
 			}
 		}
-		for (int i = 0; i <= top_numX; i++)//TOP LINE À­(µŞ)¶óÀÎ constraint
-		{
-			W[top_numY*top_numX + top_numY + i] = 0.0;
-			//cout<< W[top_numY*top_numX + top_numY + i] <<endl;
-		}
+
 
 		break;
 	case backSide:
@@ -224,7 +220,11 @@ void PBD_Cloth::initSetting(int side)
 		break;
 
 	}
-
+	for (int i = 0; i <= top_numX; i++)//TOP LINE À­(µŞ)¶óÀÎ constraint
+	{
+		W[top_numY*top_numX + top_numY + i] = 0.0;
+		//cout<< W[top_numY*top_numX + top_numY + i] <<endl;
+	}
 
 
 	for (int i = 0; i <= top_numX; i++)//TOP LINE À­(¾Õ)¶óÀÎ constraint
@@ -532,10 +532,10 @@ void PBD_Cloth::GroundCollision() //DevO: 24.07.2011
 //		}
 //	}
 //}
-float PBD_Cloth::BallCollision(Ball soccerBall)
+float PBD_Cloth::BallCollision(Ball& soccerBall)
 {
 	int numOfCollisionPoint = 0;
-
+	float coeffi = 0.0f;
 	for (size_t i = 0; i < total_points; i++)
 	{
 		float lengSum = 0;
@@ -553,6 +553,42 @@ float PBD_Cloth::BallCollision(Ball soccerBall)
 				tmp_pos[i] = tmp_pos[i] + (unitDiff * (soccerBall.radius + (EPSILON * 100000) - distance));
 				numOfCollisionPoint++;
 			}
+			float lengh = 0.0;
+			if (i <= top_numX) //À­´Ü
+			{
+				int southIndex = i + (top_numX + 1);
+				int eastIndex = i + 1;
+				int westIndex = i - 1;
+				lengh = (tmp_pos[i] - tmp_pos[southIndex]).norm() + (tmp_pos[i] - tmp_pos[eastIndex]).norm() + (tmp_pos[i] - tmp_pos[westIndex]).norm();
+				lengh = lengh / 3.0f;
+			}
+			else if (i%(top_numX+1) ==0)
+			{
+				int northIndex = i - (top_numX + 1);
+				int southIndex = i + (top_numX + 1);
+				int eastIndex = i + 1;
+				lengh = (tmp_pos[i] - tmp_pos[southIndex]).norm() + (tmp_pos[i] - tmp_pos[eastIndex]).norm() + (tmp_pos[i] - tmp_pos[northIndex]).norm();
+				lengh = lengh / 3.0f;
+			}
+			else if (i % (top_numX + 1) == 40)
+			{
+				int northIndex = i - (top_numX + 1);
+				int southIndex = i + (top_numX + 1);
+				int westIndex = i - 1;
+				lengh = (tmp_pos[i] - tmp_pos[southIndex]).norm() + (tmp_pos[i] - tmp_pos[westIndex]).norm() + (tmp_pos[i] - tmp_pos[northIndex]).norm();
+				lengh = lengh / 3.0f;
+			}
+			else
+			{
+				int northIndex = i - (top_numX + 1);
+				
+				int southIndex = i + (top_numX + 1);
+				int eastIndex = i + 1;
+				int westIndex = i - 1;
+				lengh = (tmp_pos[i] - tmp_pos[southIndex]).norm() + (tmp_pos[i] - tmp_pos[westIndex]).norm() + (tmp_pos[i] - tmp_pos[northIndex]).norm() + (tmp_pos[i] - tmp_pos[eastIndex]).norm();
+				lengh = lengh / 4.0f;
+				//cout << "lengh		" << lengh << endl;
+			}
 			//int 
 			//int northIndex = i - (top_numX + 1);
 			//int southIndex = i + (top_numX + 1);
@@ -562,20 +598,26 @@ float PBD_Cloth::BallCollision(Ball soccerBall)
 			//if()
 			//tmp_pos[i - top_numX + 1];
 			//lengSum = 
-			
+			numOfCollisionPoint = numOfCollisionPoint ;
+			coeffi = coeffi + lengh;
+			coeffi = coeffi + 1 / distance;
 		}
 	}
+	
+	if (numOfCollisionPoint != 0) //Ãæµ¹ÀÌ ÀÖÀ¸¸é
+	{
+		soccerBall.tmp_position = soccerBall.position;
 
-
-	return numOfCollisionPoint;
+	}
+	return coeffi;
 }
-float PBD_Cloth::UpdateExternalConstraints(Ball soccerBall)
+float PBD_Cloth::UpdateExternalConstraints(Ball& soccerBall)
 {
 	int temp = 0;
 	return BallCollision(soccerBall);
 	//EllipsoidCollision();
 }
-float PBD_Cloth::StepPhysics(float dt, Ball soccerBall)
+float PBD_Cloth::StepPhysics(float dt, Ball& soccerBall)
 {
 	float collisionCoefficient = 0;
 	ComputeForces();

@@ -258,13 +258,18 @@ void glut_idle(void) {
 	//cout << "timeRecorder " << timeRecorder << endl;
 
 	//	LCJ 충돌실험
-	Vector3f veltemp(0, 0.2, 4);
-	ball.getPosition();
-	ball.setPosition(ball.getPosition() + veltemp * timeStep);
+	//Vector3f veltemp(0, 0.2, 4);
+	//ball.getPosition();
+	//ball.setPosition(ball.getPosition() + veltemp * timeStep);
 
 	//#############				공의 충돌전 움직임			############################
-
-
+	//ball.setVel(Vector3f (0, 0.2, 4));
+	
+	ball.tmp_position = ball.position;
+	ball.setNewVel(ball.velocity + timeStep*(ball.gravity*100 + ball.forces *(1/ball.mass)));
+	//cout << "newvel" << ball.newVelocity <<endl;
+	ball.position = ball.tmp_position +ball.newVelocity*timeStep;
+	ball.tmp_position = ball.position;
 	//#############				공의 충돌전 움직임			############################
 	vector <float> collisionCoefficiet;
 	float sumCollCoeffi = 0.0f;
@@ -280,10 +285,23 @@ void glut_idle(void) {
 		sumCollCoeffi = sumCollCoeffi + collisionCoefficiet[collisionCoefficiet.size() - 1];
 		collisionCoefficiet.pop_back();
 	}
-	cout << sumCollCoeffi << endl;
+	cout << "sumCollCoeffi	"<<sumCollCoeffi << endl;
 	//#############				공의 충돌후 움직임			############################
+	if (sumCollCoeffi != 0) //충돌이 있으면
+	{
+		ball.newVelocity[0] = 0;// ball.newVelocity[0] - ((0.1)* sumCollCoeffi)*ball.newVelocity[0];
+		ball.newVelocity[1] = ball.velocity[1] + timeStep * (ball.gravity[1] * 100 );//ball.newVelocity[0] -((0.05)* sumCollCoeffi)*ball.newVelocity[1];
+		ball.newVelocity[2] = 0;// ball.newVelocity[0] - ((0.03)* sumCollCoeffi)*ball.newVelocity[2];
+		ball.position = ball.tmp_position + ball.newVelocity*timeStep;
 
 
+		//속도반대로 바꾸기
+		//정확히는 damping먹이기
+
+	}
+	ball.tmp_position = ball.position;
+	ball.velocity = ball.newVelocity;
+	ball.forces = Vector3f(0, 0, 0);
 	//#############				공의 충돌후 움직임			############################
 
 	glutPostRedisplay();
@@ -396,6 +414,9 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 	case 's':
 		motion_kicker = 0;
 		motion_keeper = 0;
+
+		Vector3f tmpforce(0, 2000, 4000);
+		ball.forces = tmpforce;
 		break;
 	}
 	glutPostRedisplay();
@@ -409,6 +430,8 @@ void init() {
 	GoalNetSet.push_back(&GoalNet2);
 	GoalNet3.initialization(rightSide);
 	GoalNetSet.push_back(&GoalNet3);
+
+
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);

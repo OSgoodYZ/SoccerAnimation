@@ -12,6 +12,7 @@ using namespace Eigen;
 class Ball {
 public:
 	Vector3f position;
+	Vector3f tmp_position;
 	Vector3f startPos;
 	float radius;
 	float mass;
@@ -28,8 +29,11 @@ public:
 	void reset();
 	void setPosition(Vector3f pos);
 	Vector3f getPosition() { return position; }
+	void setVel(Vector3f vel);
+	void setOldVel(Vector3f vel);
+	void setNewVel(Vector3f vel);
 
-private:
+
 	Vector3f velocity;
 	Vector3f oldVelocity;
 	Vector3f newVelocity;
