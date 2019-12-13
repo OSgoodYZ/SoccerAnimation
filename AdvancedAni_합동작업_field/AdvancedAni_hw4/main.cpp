@@ -20,6 +20,7 @@
 #include "Field.h"
 #include "FlyingCam.h"
 #include "PBD_Cloth.h"
+#include "Ball.h"
 
 using namespace std;
 
@@ -28,7 +29,9 @@ using namespace std;
 //using class instance
 FlyingCam flyCam;
 BVHObject bvhObject;
+BVHObject2 bvhObject2;
 Field field;
+Ball ball;
 PBD_Cloth GoalNet0(40,8,0.25);
 PBD_Cloth GoalNet1(40,16,0.25);
 PBD_Cloth GoalNet2(8, 16, 0.25);
@@ -44,13 +47,15 @@ int       height = 768;
 int option = -1;
 
 //Surrounding Setting
-const GLfloat  lightPosition[4] = { -5.0f, 10.0f, 10.0f, 1.0f };
+//const GLfloat  lightPosition[4] = { -5.0f, 10.0f, 10.0f, 1.0f };
 const float    wallSize = 40.0f;
-const float    modelScale = 0.020f;
-
+float    modelScale = 0.015f;
+float    modelScale2 = 2.300f;
+extern int offset_kicker;
+extern int offset_keeper;
 //Frame & TimeStep Setting	[MODEL]
 int      ModelFrameNumber = 0;					
-
+int      ModelFrameNumber2 = 0;
 //Frame & TimeStep Setting	[CLOTH]
 float	 timeStep = 1.0f / 60.0f; //1.0/60.0f;
 //float	 currentTime = 0;
@@ -60,7 +65,7 @@ float	 timeStep = 1.0f / 60.0f; //1.0/60.0f;
 
 //Model Setting
 string   fileName;
-
+string   fileName2;
 
 //##################################				LCJ WORKING			###########################################
 void ChangeSize(GLsizei w, GLsizei h)
@@ -105,26 +110,60 @@ void scene(void) {
 	}
 	glEnd();
 
-	glDisable(GL_LIGHTING);
 
+	
+	//glEnable(GL_LIGHT0);
+	glDisable(GL_LIGHTING);
 	field.render();
 	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	//glDisable(GL_LIGHT0);
 
 
-	// character
+	// character(Kicker)
 	if (bvhObject.ready) {
-		const float scale = modelScale;
+		float scale = modelScale;
+		glLoadIdentity();
 		glColor3f(1.0f, 0.0f, 0.0f);
 		glScalef(scale, scale, scale);
 		bvhObject.render(ModelFrameNumber);
+		if (ModelFrameNumber < (bvhObject.nFrames - 1))
+		{
+			ModelFrameNumber = ModelFrameNumber + 1;
+		}
+		else
+		{
+			ModelFrameNumber = bvhObject.nFrames - 1;
+		}
+		//ModelFrameNumber = ModelFrameNumber + 1;
+		//ModelFrameNumber %= bvhObject.nFrames;
+		//cout << "ModelFrameNumber:	" << ModelFrameNumber << endl;
+	}
 
-		ModelFrameNumber = ModelFrameNumber + 2;
-		ModelFrameNumber %= bvhObject.nFrames;
-		cout << "ModelFrameNumber:	" << ModelFrameNumber << endl;
+	// character (Keeper)
+	if (bvhObject2.ready) {
+		float scale2 = modelScale2;
+		glLoadIdentity();
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glScalef(scale2, scale2, scale2);
+		bvhObject2.render(ModelFrameNumber2);
+		if (ModelFrameNumber2 < (bvhObject2.nFrames - 1))
+		{
+			ModelFrameNumber2 = ModelFrameNumber2 + 1;
+		}
+		else
+		{
+			ModelFrameNumber2 = bvhObject2.nFrames - 1;
+		}
+		//ModelFrameNumber2 = ModelFrameNumber2 + 1;
+		//ModelFrameNumber2 %= bvhObject2.nFrames;
+		//cout << "ModelFrameNumber:	" << ModelFrameNumber2 << endl;
 	}
 }
 void display()
 {
+
+
 	//##################################				LCJ WORKING			###########################################
 	//#########		LCJ FRAME ############
 	//float newTime = (float)glutGet(GLUT_ELAPSED_TIME);
@@ -160,6 +199,8 @@ void display()
 		(*it)->DrawCloth();;
 	}
 
+	ball.render();
+
 	glutSwapBuffers();
 	//glutPostRedisplay();
 }
@@ -193,28 +234,53 @@ void menu(int id)
 	switch (option)
 	{
 	case 0:
-		fileName = string("BVH_Data/1001.bvh");
+		fileName = string("BVH_Data/kicker/kicker_ready.bvh"); //kicker
+		ModelFrameNumber = 0;
+		offset_kicker=-400; //init z_p = -198, last z_p = 210
+		modelScale = 0.02f;
 		bvhObject.init(fileName);
+
+		fileName2 = string("BVH_Data/keeper/keeper_ready.bvh"); //keeper
+		ModelFrameNumber2 = 0;
+		modelScale2 = 0.04f;
+		offset_keeper = 310;
+		bvhObject2.init(fileName2);
 		break;
 	case 1:
-		fileName = string("BVH_Data/1002.bvh");
+		fileName = string("BVH_Data/kicker/fast_1101.bvh");
+		ModelFrameNumber = 0;
+		offset_kicker = 10; // init z_p = -202, last z_p = 80
+		modelScale = 0.02f;
 		bvhObject.init(fileName);
+		fileName2 = string("BVH_Data/keeper/keeper_blocking.bvh");
+		//modelScale = 2.300f;
+		ModelFrameNumber2 = 0;
+		bvhObject2.init(fileName2);
+
 		break;
 	case 2:
-		fileName = string("BVH_Data/1003.bvh");
+		fileName = string("BVH_Data/kicker/1003.bvh");
 		bvhObject.init(fileName);
+		fileName2 = string("BVH_Data/keeper/keeper_dive_right.bvh");
+		bvhObject2.init(fileName2);
 		break;
 	case 3:
-		fileName = string("BVH_Data/1005.bvh");
+		fileName = string("BVH_Data/kicker/1005.bvh");
 		bvhObject.init(fileName);
+		fileName2 = string("BVH_Data/keeper/keeper_cele.bvh");
+		bvhObject2.init(fileName2);
 		break;
 	case 4:
-		fileName = string("BVH_Data/1006.bvh");
+		fileName = string("BVH_Data/kicker/1006.bvh");
 		bvhObject.init(fileName);
+		fileName2 = string("BVH_Data/keeper/keeper_jump_left.bvh");
+		bvhObject2.init(fileName2);
 		break;
 	case 5:
-		fileName = string("BVH_Data/1101.bvh");
+		fileName = string("BVH_Data/kicker/1101.bvh");
 		bvhObject.init(fileName);
+		fileName2 = string("BVH_Data/keeper/keeper_jump_right.bvh");
+		bvhObject2.init(fileName2);
 		break;
 
 	}
@@ -251,20 +317,25 @@ void init() {
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_DIFFUSE);
 
-	const GLfloat lightColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	const GLfloat lightAmbient[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+	const GLfloat lightColor[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+	const GLfloat lightAmbient[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+	float Position[] = { 0.0f, 1000.0f, 10.0f, 1.0f };  //조명 위치
 
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
+	glLightfv(GL_LIGHT0, GL_POSITION, Position);     // 광원 위치 설정
 
-	const GLfloat ambient[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-	const GLfloat specular[] = { 0.4f, 1.0f, 0.4f, 1.0f };
-	const GLfloat shininess[] = { 20.0f };
+	const GLfloat ambient[] = { 0.1f, 0.1f, 0.1f, 0.0f };
+	const GLfloat specular[] = { 0.5f, 0.5f, 0.5f, 0.0f };
+	float diffuse[] = { 0.5f, 0.5f, 0.5f, 0.0f };
+	//const GLfloat shininess[] = { 60.0f };
 
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, specular);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+
+	//glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
 }
 void manual()
 {

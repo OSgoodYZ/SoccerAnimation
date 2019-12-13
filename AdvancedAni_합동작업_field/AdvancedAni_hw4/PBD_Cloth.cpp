@@ -8,6 +8,8 @@ PBD_Cloth::PBD_Cloth()
 
 	total_points = (top_numX + 1)*(top_numY + 1) ;
 	
+	
+	
 	size_horizon = 10;
 	hsize = size_horizon / 2.0f;
 	
@@ -299,25 +301,17 @@ void PBD_Cloth::AddBendingConstraint(int pa, int pb, int pc, float k) {
 }
 void PBD_Cloth::DrawCloth()
 {
-	//glDisable(GL_LIGHTING);
-	//draw polygons
-	//glDisable(GL_LIGHTING);
 	glEnable(GL_LIGHTING);
-	const GLfloat ambient[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	const GLfloat specular[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-	const GLfloat shininess[] = { 1.0f };
-
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
-
-
+	glEnable(GL_LIGHT0);
+	//draw polygons
+	
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
 
 	glColor3f(1, 1, 1);
 	//GL_TRIANGLES
+	glLineWidth(1);
 	glBegin(GL_LINES);
 	for (int i = 0; i < indices.size(); i += 3) {
 		Vector3f p1 = pos[indices[i]];
@@ -339,20 +333,21 @@ void PBD_Cloth::DrawCloth()
 	//}
 	//glEnd();
 
-	glColor3f(1, 0, 0);
+	//glPointSize(5);
+	//glColor3f(1, 0, 0);
 
-	//draw points
-	glBegin(GL_POINTS);
-	for (int i = 0; i < total_points; i++) {
-		Vector3f p = pos[i];
-		int is = (i == selected_index);
-		glColor3f((float)!is, (float)is, (float)is);
-		glVertex3f(p[0], p[1], p[2]);
-	}
-	glEnd();
+	////draw points
+	//glBegin(GL_POINTS);
+	//for (int i = 0; i < total_points; i++) {
+	//	Vector3f p = pos[i];
+	//	int is = (i == selected_index);
+	//	glColor3f((float)!is, (float)is, (float)is);
+	//	glVertex3f(p[0], p[1], p[2]);
+	//}
+	//glEnd();
 	glPopMatrix();
 	glDisable(GL_LIGHTING);
-	//glEnable(GL_LIGHTING);
+	
 }
 
 void PBD_Cloth::OnShutdown()
