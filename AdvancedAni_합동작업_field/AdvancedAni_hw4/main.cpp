@@ -340,7 +340,10 @@ void glut_idle(void) {
 
 		else if (update_timer > bvhObject.interval) {
 			ModelFrameNumber++;
-			if (motion_kicker == 1 && ModelFrameNumber == 222) balls[targetBall].setVelocity(Vector3f(3, 4, 15)); //1.5, 4, 8
+			if (motion_kicker == 1 && ModelFrameNumber == 222) {
+				balls[targetBall].setVelocity(Vector3f(3, 4, 15)); //1.5, 4, 8
+				targetBall = -1;
+			}
 			update_timer = 0;
 		}
 	}
@@ -420,13 +423,19 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 		motion_kicker = 0;
 		motion_keeper = 0;
 
+		if (targetBall == -1) {
+			balls.emplace_back();
+			targetBall = balls.size() - 1;
+		}
 		break;
 	case 't':
 		balls.emplace_back();
 		targetBall = balls.size() - 1;
 		balls[targetBall].setPosition(Vector3f(-0.7, 2, 15));
 		balls[targetBall].setVelocity(Vector3f(0, 0, 5));//7
+		break;
 	}
+	
 	glutPostRedisplay();
 }
 void init() {
