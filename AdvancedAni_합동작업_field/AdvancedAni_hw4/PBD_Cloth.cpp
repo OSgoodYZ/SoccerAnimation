@@ -527,9 +527,9 @@ void PBD_Cloth::GroundCollision() //DevO: 24.07.2011
 //		}
 //	}
 //}
-void PBD_Cloth::BallCollision(Ball soccerBall)
+Vector3f PBD_Cloth::BallCollision(Ball soccerBall)
 {
-	
+	Vector3f total_force = Vector3f(0, 0, 0);
 	for (size_t i = 0; i < total_points; i++)
 	{
 		Vector3f diffBallNetpoint = tmp_pos[i] - soccerBall.getPosition();
@@ -540,27 +540,34 @@ void PBD_Cloth::BallCollision(Ball soccerBall)
 		//diffBallNetpoint.normalize() *distance;
 		if (distance < soccerBall.radius + (EPSILON*100000))
 		{
-			if(W[i] != 0)			tmp_pos[i] = tmp_pos[i] + (unitDiff * (soccerBall.radius + (EPSILON * 100000) - distance));
+			if (W[i] != 0) {
+				Vector3f temp = tmp_pos[i] + (unitDiff * (soccerBall.radius + (EPSILON * 100000) - distance));
+				total_force += (W[i] * (temp - tmp_pos[i]));
+				tmp_pos[i] = temp;
+			}
 		}
 	}
+
+	return total_force;
 }
-void PBD_Cloth::UpdateExternalConstraints(Ball soccerBall)
+Vector3f PBD_Cloth::UpdateExternalConstraints(Ball soccerBall)
 {
 	int temp = 0;
-	BallCollision(soccerBall);
+	return BallCollision(soccerBall);
 	//EllipsoidCollision();
 }
-void PBD_Cloth::StepPhysics(float dt, Ball soccerBall)
+Vector3f PBD_Cloth::StepPhysics(float dt, Ball soccerBall)
 {
 	ComputeForces();
 	IntegrateExplicitWithDamping(dt);
 
 	// for collision constraints
 	UpdateInternalConstraints(dt);
-	UpdateExternalConstraints(soccerBall);
+	Vector3f force = UpdateExternalConstraints(soccerBall);
 
 	Integrate(dt);
 
+	return force;
 }
 void PBD_Cloth::UpdateInternalConstraints(float deltaTime)
 {

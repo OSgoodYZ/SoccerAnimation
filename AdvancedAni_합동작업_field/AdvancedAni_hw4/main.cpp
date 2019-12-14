@@ -262,11 +262,19 @@ void glut_idle(void) {
 	//ball.getPosition();
 	//ball.setPosition(ball.getPosition() + veltemp * timeStep);
 
+	//############# Ball movement ############
+	ball.updatePosition(timeStep);
+	ball.collideWithGround();
+	//############# Ball movement ############
+
 	//############# LCJ CLOTH ###############
+	Vector3f forces = Vector3f(0, 0, 0);
 	for (vector<PBD_Cloth*>::iterator it = GoalNetSet.begin(); it != GoalNetSet.end(); ++it)
 	{
-		(*it)->StepPhysics(timeStep, ball);
+		forces += (*it)->StepPhysics(timeStep, ball);
 	}
+
+	ball.updateVelocity(forces);
 
 
 	glutPostRedisplay();
@@ -380,6 +388,9 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 		motion_kicker = 0;
 		motion_keeper = 0;
 		break;
+	case 't':
+		ball.setPosition(Vector3f(-0.7, 3, 13));
+		ball.setVelocity(Vector3f(0, 0, 3));
 	}
 	glutPostRedisplay();
 }

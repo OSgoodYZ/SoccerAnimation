@@ -1,14 +1,15 @@
 #include "Ball.h"
 
 Ball::Ball() {
-	radius = 0.4;
-	mass = 1;
+	radius = 0.3;
+	mass = 0.1;
 	friction = 0.1;
-	startPos = Vector3f(-0.7, radius, 1);
+	startPos = Vector3f(-0.7, radius + 3, 13);
+	bounce = 0.8;
 
 	position = startPos + Vector3f(0, 0, 0);
 	forces = Vector3f(0, 0, 0);
-	velocity = Vector3f(0, 0, 0);
+	velocity = Vector3f(0, 0, 3);
 	oldVelocity = Vector3f(0, 0, 0);
 	newVelocity = Vector3f(0, 0, 0);
 }
@@ -52,12 +53,37 @@ void Ball::reset() {
 
 void Ball::setPosition(Vector3f pos) {
 	position = pos + Vector3f(0, 0, 0);
-	forces = Vector3f(0, 0, 0);
+	//forces = Vector3f(0, 0, 0);
 	velocity = Vector3f(0, 0, 0);
 	oldVelocity = Vector3f(0, 0, 0);
 	newVelocity = Vector3f(0, 0, 0);
 }
 
+void Ball::setVelocity(Vector3f vel) {
+	velocity = vel;
+	oldVelocity = Vector3f(0, 0, 0);
+	newVelocity = Vector3f(0, 0, 0);
+}
+
 void Ball::updatePosition(float deltaTime) {
-	return;
+	Vector3f newPos = position + (1-damping/100)*velocity*deltaTime + 0.5*(gravity*1000 + forces/mass)*deltaTime*deltaTime;
+	//velocity = (newPos - position) / deltaTime;
+	velocity = velocity + (gravity * 1000 + forces / mass)*deltaTime;
+	position = newPos;
+	//forces = Vector3f(0, 0, 0);
+}
+
+void Ball::updateVelocity(Vector3f forces) {
+	Vector3f newVel = velocity + -forces / mass * 0.7;
+	velocity = newVel;
+}
+
+
+void Ball::collideWithGround() {
+	if (position[1] < radius) {
+		position[1] = radius;
+		velocity[1] = -bounce * velocity[1];
+		velocity[0] = (1 - friction) * velocity[0];
+		velocity[2] = (1 - friction) * velocity[2];
+	}
 }
