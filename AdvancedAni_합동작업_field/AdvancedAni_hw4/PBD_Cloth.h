@@ -30,7 +30,7 @@ public:
 
 	int getIndex(int i, int j) {return j * (top_numX + 1) + i;	}
 
-	Vector3f StepPhysics(float dt, Ball soccerBall);
+	Vector3f StepPhysics(float dt, Ball& soccerBall);
 	void ComputeForces();
 	void IntegrateExplicitWithDamping(float deltaTime);
 	void Integrate(float deltaTime);
@@ -47,10 +47,10 @@ public:
 
 	void GroundCollision();
 	//void EllipsoidCollision();
-	Vector3f UpdateExternalConstraints(Ball soccerBall);
+	Vector3f UpdateExternalConstraints(Ball& soccerBall);
 	void UpdateInternalConstraints(float deltaTime);
 
-	Vector3f BallCollision(Ball soccerBall);
+	Vector3f BallCollision(Ball& soccerBall);
 	int top_numX , top_numY; //these ar the number of quads
 	
 	int total_points = (top_numX + 1)*(top_numY + 1);

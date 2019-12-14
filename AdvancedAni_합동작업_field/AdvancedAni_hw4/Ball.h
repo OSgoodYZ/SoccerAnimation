@@ -37,7 +37,7 @@ public:
 	void setVelocity(Vector3f vel);
 	Vector3f getPosition() { return position; }
 	Vector3f getPreviousPosition() {return prevPos; }
-	Vector3f getVelocity() { return velocity; }
+	Vector3f & getVelocity() { return velocity; }
 
 private:
 	Vector3f velocity;

@@ -284,7 +284,7 @@ void glut_idle(void) {
 	//############# LCJ CLOTH ###############
 	vector<Vector3f> moments;
 	//collisionResult momentum;
-
+	 
 	for (Ball &ball : balls) {
 		Vector3f total = Vector3f(0, 0, 0);
 		for (vector<PBD_Cloth*>::iterator it = GoalNetSet.begin(); it != GoalNetSet.end(); ++it)
@@ -292,6 +292,8 @@ void glut_idle(void) {
 			total += (*it)->StepPhysics(timeStep, ball);
 		}
 		moments.push_back(total);
+
+
 	}
 
 	if (balls.size() != moments.size()) {
@@ -300,9 +302,10 @@ void glut_idle(void) {
 		cout << "numMoments: " << moments.size() << endl;
 	}
 
-	for (int i = 0; i < balls.size(); i++) {
-		balls[i].updateVelocity(moments[i]);
-	}
+
+	//for (int i = 0; i < balls.size(); i++) {
+	//	balls[i].updateVelocity(moments[i]);
+	//}
 
 	
 	//Sleep(5); //TODO
@@ -341,7 +344,7 @@ void glut_idle(void) {
 		else if (update_timer > bvhObject.interval) {
 			ModelFrameNumber++;
 			if (motion_kicker == 1 && ModelFrameNumber == 222) {
-				balls[targetBall].setVelocity(Vector3f(3, 4, 15)); //1.5, 4, 8
+				balls[targetBall].setVelocity(Vector3f(3, 4, 8)); //1.5, 4, 8
 				targetBall = -1;
 			}
 			update_timer = 0;
