@@ -10,6 +10,7 @@ using namespace Eigen;
 
 #define PI 3.1415926536f
 
+
 class Ball {
 public:
 	Vector3f position;
@@ -33,7 +34,7 @@ public:
 	void setPosition(Vector3f pos);
 	void setVelocity(Vector3f vel);
 	Vector3f getPosition() { return position; }
-	Vector3f getPreviousPosition() { prevPos; }
+	Vector3f getPreviousPosition() {return prevPos; }
 
 private:
 	Vector3f velocity;

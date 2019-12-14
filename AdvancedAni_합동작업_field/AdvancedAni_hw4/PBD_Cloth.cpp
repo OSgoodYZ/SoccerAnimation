@@ -533,12 +533,13 @@ Vector3f PBD_Cloth::BallCollision(Ball soccerBall)
 	for (size_t i = 0; i < total_points; i++)
 	{
 		Vector3f diffBallNetpoint = tmp_pos[i] - soccerBall.getPosition();
+		Vector3f diffPreBallNetpoint = tmp_pos[i] - soccerBall.getPreviousPosition();
 		double distance = (diffBallNetpoint).norm();
 
 		Vector3f unitDiff = diffBallNetpoint.normalized();
 		
 		//diffBallNetpoint.normalize() *distance;
-		if (distance < soccerBall.radius + (EPSILON*100000))
+		if (distance < soccerBall.radius + (EPSILON*100000)) //discrete collision 
 		{
 			if (W[i] != 0) {
 				Vector3f temp = tmp_pos[i] + (unitDiff * (soccerBall.radius + (EPSILON * 200000) - distance));
@@ -546,6 +547,18 @@ Vector3f PBD_Cloth::BallCollision(Ball soccerBall)
 				tmp_pos[i] = temp;
 			}
 		}
+		if (diffBallNetpoint.dot(diffPreBallNetpoint)<0) //continuous collistion 
+		{
+			if (W[i] != 0) {
+				Vector3f temp = tmp_pos[i] + (diffBallNetpoint - diffPreBallNetpoint+(diffBallNetpoint.stableNormalized())*(soccerBall.radius + (EPSILON * 100000)));
+				
+				total_force += (W[i] * (temp - tmp_pos[i])) ;
+				tmp_pos[i] = temp;
+				
+				cout << "Continuous Collision Detected!!	" << endl;
+			}
+		}
+
 	}
 
 	return total_force;

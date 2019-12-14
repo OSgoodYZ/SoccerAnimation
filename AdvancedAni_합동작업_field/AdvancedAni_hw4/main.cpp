@@ -264,11 +264,14 @@ void glut_idle(void) {
 
 	//############# Ball movement ############
 	ball.updatePosition(timeStep);
+
 	ball.collideWithGround();
 	//############# Ball movement ############
 
 	//############# LCJ CLOTH ###############
 	Vector3f forces = Vector3f(0, 0, 0);
+	//collisionResult momentum;
+
 	for (vector<PBD_Cloth*>::iterator it = GoalNetSet.begin(); it != GoalNetSet.end(); ++it)
 	{
 		forces += (*it)->StepPhysics(timeStep, ball);
@@ -276,8 +279,7 @@ void glut_idle(void) {
 
 	ball.updateVelocity(forces);
 
-
-	glutPostRedisplay();
+	
 	//Sleep(5); //TODO
 
 		//############# JJH BVH motion ###############
@@ -313,7 +315,7 @@ void glut_idle(void) {
 
 		else if (update_timer > bvhObject.interval) {
 			ModelFrameNumber++;
-			if (motion_kicker == 1 && ModelFrameNumber == 222) ball.setVelocity(Vector3f(1.5, 4, 8));
+			if (motion_kicker == 1 && ModelFrameNumber == 222) ball.setVelocity(Vector3f(1.5, 4, 20)); //1.5, 4, 8
 			update_timer = 0;
 		}
 	}
@@ -355,6 +357,7 @@ void glut_idle(void) {
 	else {
 		ModelFrameNumber2 = 0;
 	}
+	glutPostRedisplay();
 }
 
 
@@ -395,7 +398,7 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 		break;
 	case 't':
 		ball.setPosition(Vector3f(-0.7, 2, 15));
-		ball.setVelocity(Vector3f(0, 0, 7));
+		ball.setVelocity(Vector3f(0, 0, 7));//7
 	}
 	glutPostRedisplay();
 }
