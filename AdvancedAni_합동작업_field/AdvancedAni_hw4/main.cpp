@@ -313,6 +313,8 @@ void glut_idle(void) {
 
 		else if (update_timer > bvhObject.interval) {
 			ModelFrameNumber++;
+			cout << "frame num: " << ModelFrameNumber << endl;
+			if (motion_kicker == 1 && ModelFrameNumber == 222) ball.setVelocity(Vector3f(1.5, 4, 8));
 			update_timer = 0;
 		}
 	}
@@ -383,14 +385,18 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 		bvhObject2.pose_save2(0);
 		bvhObject2.pose_save1(0);
 
+		ball.reset();
+
 		break;
 	case 's':
 		motion_kicker = 0;
 		motion_keeper = 0;
+
+		ball.reset();
 		break;
 	case 't':
-		ball.setPosition(Vector3f(-0.7, 3, 13));
-		ball.setVelocity(Vector3f(0, 0, 3));
+		ball.setPosition(Vector3f(-0.7, 2, 15));
+		ball.setVelocity(Vector3f(0, 0, 7));
 	}
 	glutPostRedisplay();
 }
