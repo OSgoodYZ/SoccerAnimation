@@ -78,7 +78,7 @@ void Ball::updatePosition(float deltaTime) {
 }
 
 void Ball::updateVelocity(Vector3f forces) {
-	Vector3f newVel = velocity + -forces / mass * 0.7;
+	Vector3f newVel = velocity + -forces / mass * 0.7;//0.7
 	velocity = newVel;
 }
 
