@@ -78,7 +78,10 @@ void Ball::updatePosition(float deltaTime) {
 }
 
 void Ball::updateVelocity(Vector3f forces) {
-	Vector3f newVel = velocity + -forces / mass * 0.7;//0.7
+	float factor = 0.7;
+	if (velocity.norm() > 8) factor *= velocity[2] * 0.8;
+	forces[2] *= factor;
+	Vector3f newVel = velocity + -forces / mass * 0.8;//0.7
 	velocity = newVel;
 }
 
@@ -90,4 +93,18 @@ void Ball::collideWithGround() {
 		velocity[0] = (1 - friction) * velocity[0];
 		velocity[2] = (1 - friction) * velocity[2];
 	}
+}
+
+void Ball::collideWithBalls(vector<Ball> balls) {
+	newVelocity = velocity;
+	for (Ball &other : balls) {
+		float distance = (position - other.getPosition()).norm();
+		if (distance != 0 && distance <= radius * 2) {
+			newVelocity -= (velocity - other.getVelocity()).dot(position - other.getPosition()) / (distance*distance) * (position - other.getPosition());
+		}
+	}
+}
+
+void Ball::applyChanges() {
+	velocity = newVelocity;
 }

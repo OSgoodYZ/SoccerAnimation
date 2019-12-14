@@ -31,7 +31,8 @@ FlyingCam flyCam;
 BVHObject bvhObject;
 BVHObject2 bvhObject2;
 Field field;
-Ball ball;
+vector<Ball> balls;
+int targetBall;
 PBD_Cloth GoalNet0(40,8,0.25);
 PBD_Cloth GoalNet1(40,16,0.25);
 PBD_Cloth GoalNet2(8, 16, 0.25);
@@ -240,7 +241,9 @@ void display()
 		(*it)->DrawCloth();;
 	}
 
-	ball.render();
+	for (Ball &ball : balls) {
+		ball.render();
+	}
 
 	glutSwapBuffers();
 	//glutPostRedisplay();
@@ -263,21 +266,43 @@ void glut_idle(void) {
 	//ball.setPosition(ball.getPosition() + veltemp * timeStep);
 
 	//############# Ball movement ############
-	ball.updatePosition(timeStep);
+	for (Ball &ball : balls) {
+		ball.updatePosition(timeStep);
 
-	ball.collideWithGround();
+		ball.collideWithGround();
+	}
+
+	for (Ball &ball : balls) {
+		ball.collideWithBalls(balls);
+	}
+	
+	for (Ball &ball : balls) {
+		ball.applyChanges();
+	}
 	//############# Ball movement ############
 
 	//############# LCJ CLOTH ###############
-	Vector3f forces = Vector3f(0, 0, 0);
+	vector<Vector3f> moments;
 	//collisionResult momentum;
 
-	for (vector<PBD_Cloth*>::iterator it = GoalNetSet.begin(); it != GoalNetSet.end(); ++it)
-	{
-		forces += (*it)->StepPhysics(timeStep, ball);
+	for (Ball &ball : balls) {
+		Vector3f total = Vector3f(0, 0, 0);
+		for (vector<PBD_Cloth*>::iterator it = GoalNetSet.begin(); it != GoalNetSet.end(); ++it)
+		{
+			total += (*it)->StepPhysics(timeStep, ball);
+		}
+		moments.push_back(total);
 	}
 
-	ball.updateVelocity(forces);
+	if (balls.size() != moments.size()) {
+		cout << "problem" << endl;
+		cout << "numBall: " << balls.size() << endl;
+		cout << "numMoments: " << moments.size() << endl;
+	}
+
+	for (int i = 0; i < balls.size(); i++) {
+		balls[i].updateVelocity(moments[i]);
+	}
 
 	
 	//Sleep(5); //TODO
@@ -315,12 +340,7 @@ void glut_idle(void) {
 
 		else if (update_timer > bvhObject.interval) {
 			ModelFrameNumber++;
-			if (motion_kicker == 1 && ModelFrameNumber == 222)
-			{
-				ball.setVelocity(Vector3f(1.5, 4, 20)); //1.5, 4, 8
-				cout << "set vel" << endl;
-			}
-				
+			if (motion_kicker == 1 && ModelFrameNumber == 222) balls[targetBall].setVelocity(Vector3f(3, 4, 15)); //1.5, 4, 8
 			update_timer = 0;
 		}
 	}
@@ -392,18 +412,20 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 		bvhObject2.pose_save2(0);
 		bvhObject2.pose_save1(0);
 
-		ball.reset();
+		balls.emplace_back();
+		targetBall = balls.size() - 1;
 
 		break;
 	case 's':
 		motion_kicker = 0;
 		motion_keeper = 0;
 
-		ball.reset();
 		break;
 	case 't':
-		ball.setPosition(Vector3f(-0.7, 2, 15));
-		ball.setVelocity(Vector3f(0, 0, 7));//7
+		balls.emplace_back();
+		targetBall = balls.size() - 1;
+		balls[targetBall].setPosition(Vector3f(-0.7, 2, 15));
+		balls[targetBall].setVelocity(Vector3f(0, 0, 5));//7
 	}
 	glutPostRedisplay();
 }

@@ -28,13 +28,16 @@ public:
 	Ball(Vector3f startPos, float radius, float mass, float friction, float bounce);
 	void render();
 	void updatePosition(float deltaTime);
-	void updateVelocity(Vector3f forces);
+	void updateVelocity(Vector3f moment);
 	void collideWithGround();
+	void collideWithBalls(vector<Ball> balls);
+	void applyChanges();
 	void reset();
 	void setPosition(Vector3f pos);
 	void setVelocity(Vector3f vel);
 	Vector3f getPosition() { return position; }
 	Vector3f getPreviousPosition() {return prevPos; }
+	Vector3f getVelocity() { return velocity; }
 
 private:
 	Vector3f velocity;
