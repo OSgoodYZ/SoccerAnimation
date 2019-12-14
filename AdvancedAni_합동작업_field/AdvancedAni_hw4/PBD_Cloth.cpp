@@ -554,41 +554,43 @@ float PBD_Cloth::BallCollision(Ball& soccerBall)
 				numOfCollisionPoint++;
 			}
 			float lengh = 0.0;
-			if (i <= top_numX) //À­´Ü
-			{
-				int southIndex = i + (top_numX + 1);
-				int eastIndex = i + 1;
-				int westIndex = i - 1;
-				lengh = (tmp_pos[i] - tmp_pos[southIndex]).norm() + (tmp_pos[i] - tmp_pos[eastIndex]).norm() + (tmp_pos[i] - tmp_pos[westIndex]).norm();
-				lengh = lengh / 3.0f;
-			}
-			else if (i%(top_numX+1) ==0)
-			{
-				int northIndex = i - (top_numX + 1);
-				int southIndex = i + (top_numX + 1);
-				int eastIndex = i + 1;
-				lengh = (tmp_pos[i] - tmp_pos[southIndex]).norm() + (tmp_pos[i] - tmp_pos[eastIndex]).norm() + (tmp_pos[i] - tmp_pos[northIndex]).norm();
-				lengh = lengh / 3.0f;
-			}
-			else if (i % (top_numX + 1) == 40)
-			{
-				int northIndex = i - (top_numX + 1);
-				int southIndex = i + (top_numX + 1);
-				int westIndex = i - 1;
-				lengh = (tmp_pos[i] - tmp_pos[southIndex]).norm() + (tmp_pos[i] - tmp_pos[westIndex]).norm() + (tmp_pos[i] - tmp_pos[northIndex]).norm();
-				lengh = lengh / 3.0f;
-			}
-			else
-			{
-				int northIndex = i - (top_numX + 1);
-				
-				int southIndex = i + (top_numX + 1);
-				int eastIndex = i + 1;
-				int westIndex = i - 1;
-				lengh = (tmp_pos[i] - tmp_pos[southIndex]).norm() + (tmp_pos[i] - tmp_pos[westIndex]).norm() + (tmp_pos[i] - tmp_pos[northIndex]).norm() + (tmp_pos[i] - tmp_pos[eastIndex]).norm();
-				lengh = lengh / 4.0f;
-				//cout << "lengh		" << lengh << endl;
-			}
+
+				if (i <= top_numX) //À­´Ü
+				{
+					int southIndex = i + (top_numX + 1);
+					int eastIndex = i + 1;
+					int westIndex = i - 1;
+					lengh = (tmp_pos[i] - tmp_pos[southIndex]).norm() + (tmp_pos[i] - tmp_pos[eastIndex]).norm() + (tmp_pos[i] - tmp_pos[westIndex]).norm();
+					lengh = lengh / 3.0f;
+				}
+				else if (i % (top_numX + 1) == 0)
+				{
+					int northIndex = i - (top_numX + 1);
+					int southIndex = i + (top_numX + 1);
+					int eastIndex = i + 1;
+					lengh = (tmp_pos[i] - tmp_pos[southIndex]).norm() + (tmp_pos[i] - tmp_pos[eastIndex]).norm() + (tmp_pos[i] - tmp_pos[northIndex]).norm();
+					lengh = lengh / 3.0f;
+				}
+				else if (i % (top_numX + 1) == 40)
+				{
+					int northIndex = i - (top_numX + 1);
+					int southIndex = i + (top_numX + 1);
+					int westIndex = i - 1;
+					lengh = (tmp_pos[i] - tmp_pos[southIndex]).norm() + (tmp_pos[i] - tmp_pos[westIndex]).norm() + (tmp_pos[i] - tmp_pos[northIndex]).norm();
+					lengh = lengh / 3.0f;
+				}
+				else
+				{
+					int northIndex = i - (top_numX + 1);
+					int southIndex = i + (top_numX + 1);
+					int eastIndex = i + 1;
+					int westIndex = i - 1;
+					lengh = (tmp_pos[i] - tmp_pos[southIndex]).norm() + (tmp_pos[i] - tmp_pos[westIndex]).norm() + (tmp_pos[i] - tmp_pos[northIndex]).norm() + (tmp_pos[i] - tmp_pos[eastIndex]).norm();
+					lengh = lengh / 4.0f;
+					//cout << "lengh		" << lengh << endl;
+				}
+
+
 			//int 
 			//int northIndex = i - (top_numX + 1);
 			//int southIndex = i + (top_numX + 1);

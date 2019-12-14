@@ -299,6 +299,23 @@ void glut_idle(void) {
 		//Á¤È®È÷´Â damping¸ÔÀÌ±â
 
 	}
+	//		ground collision
+	
+	if (ball.position[1] - ball.radius < 0 - 0.05f) //collision with ground  axis y
+	{
+		ball.position[1] = ball.radius;
+		ball.newVelocity[1] = -0.5*ball.newVelocity[1];
+
+	}
+	if (ball.position[1] + ball.radius >= 4) //collision with À­±×¹°
+	{
+		//ball.position[1] = ball.radius;
+		ball.newVelocity[1] = 0;
+
+	}
+		//tmp_pos[i][1] = 0;
+	
+
 	ball.tmp_position = ball.position;
 	ball.velocity = ball.newVelocity;
 	ball.forces = Vector3f(0, 0, 0);
@@ -415,7 +432,7 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 		motion_kicker = 0;
 		motion_keeper = 0;
 
-		Vector3f tmpforce(0, 2000, 4000);
+		Vector3f tmpforce(0, 1800, 9000);
 		ball.forces = tmpforce;
 		break;
 	}
