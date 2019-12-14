@@ -301,7 +301,7 @@ void glut_idle(void) {
 	}
 	//		ground collision
 	
-	if (ball.position[1] - ball.radius < 0 - 0.05f) //collision with ground  axis y
+	if (ball.position[1] - ball.radius <= 0 ) //collision with ground  axis y
 	{
 		ball.position[1] = ball.radius;
 		ball.newVelocity[1] = -0.5*ball.newVelocity[1];
@@ -432,7 +432,7 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 		motion_kicker = 0;
 		motion_keeper = 0;
 
-		Vector3f tmpforce(0, 1800, 9000);
+		Vector3f tmpforce(5000, 1000, 20000);
 		ball.forces = tmpforce;
 		break;
 	}

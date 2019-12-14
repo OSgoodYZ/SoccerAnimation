@@ -327,19 +327,22 @@ void PBD_Cloth::DrawCloth()
 	//}
 	//glEnd();
 
-	glPointSize(5);
-	glColor3f(1, 0, 0);
 
-	//draw points
-	glBegin(GL_POINTS);
-	for (int i = 0; i < total_points; i++) {
-		Vector3f p = pos[i];
-		int is = (i == selected_index);
-		glColor3f((float)!is, (float)is, (float)is);
-		glVertex3f(p[0], p[1], p[2]);
-	}
-	glEnd();
+	////draw points
+	//glPointSize(5);
+	//glColor3f(1, 0, 0);
+	//glBegin(GL_POINTS);
+	//for (int i = 0; i < total_points; i++) {
+	//	Vector3f p = pos[i];
+	//	int is = (i == selected_index);
+	//	glColor3f((float)!is, (float)is, (float)is);
+	//	glVertex3f(p[0], p[1], p[2]);
+	//}
+	//glEnd();
+
+
 	glPopMatrix();
+
 	//glDisable(GL_LIGHTING);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
@@ -550,7 +553,7 @@ float PBD_Cloth::BallCollision(Ball& soccerBall)
 		{
 			if (W[i] != 0)
 			{
-				tmp_pos[i] = tmp_pos[i] + (unitDiff * (soccerBall.radius + (EPSILON * 100000) - distance));
+				tmp_pos[i] = tmp_pos[i] + (unitDiff * (soccerBall.radius + (EPSILON * 900000) - distance));
 				numOfCollisionPoint++;
 			}
 			float lengh = 0.0;
