@@ -180,10 +180,7 @@ void PBD_Cloth::initSetting(int side)
 				pos[count++] = Vector3f(i*0.25 - 5, 4, j*0.25 + 16); //(-5,4,16) °ñ´ë ÁÂÃø À§ ÁÂÇ¥
 			}
 		}
-		for (int i = 0; i <= top_numX; i++)//TOP LINE À­(µŞ)¶óÀÎ constraint
-		{
-			W[top_numY*top_numX + top_numY + i] = 0.0;
-		}
+
 
 		break;
 	case backSide:
@@ -221,7 +218,10 @@ void PBD_Cloth::initSetting(int side)
 	for (int i = 0; i < total_points; i++) {
 		W[i] = 1.0f / mass;
 	}
-
+	for (int i = 0; i <= top_numX; i++)//TOP LINE À­(µŞ)¶óÀÎ constraint
+	{
+		W[top_numY*top_numX + top_numY + i] = 0.0;
+	}
 	for (int i = 0; i <= top_numX; i++)//TOP LINE À­(¾Õ)¶óÀÎ constraint
 	{
 		W[i] = 0.0;
@@ -541,7 +541,7 @@ Vector3f PBD_Cloth::BallCollision(Ball soccerBall)
 		if (distance < soccerBall.radius + (EPSILON*100000))
 		{
 			if (W[i] != 0) {
-				Vector3f temp = tmp_pos[i] + (unitDiff * (soccerBall.radius + (EPSILON * 100000) - distance));
+				Vector3f temp = tmp_pos[i] + (unitDiff * (soccerBall.radius + (EPSILON * 200000) - distance));
 				total_force += (W[i] * (temp - tmp_pos[i]));
 				tmp_pos[i] = temp;
 			}
