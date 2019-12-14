@@ -313,7 +313,6 @@ void glut_idle(void) {
 
 		else if (update_timer > bvhObject.interval) {
 			ModelFrameNumber++;
-			cout << "frame num: " << ModelFrameNumber << endl;
 			if (motion_kicker == 1 && ModelFrameNumber == 222) ball.setVelocity(Vector3f(1.5, 4, 8));
 			update_timer = 0;
 		}
