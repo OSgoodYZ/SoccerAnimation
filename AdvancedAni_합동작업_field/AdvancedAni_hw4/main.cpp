@@ -33,8 +33,8 @@ BVHObject2 bvhObject2;
 Field field;
 vector<Ball> balls;
 int targetBall = -1;
-PBD_Cloth GoalNet0(40,8,0.25);
-PBD_Cloth GoalNet1(40,16,0.25);
+PBD_Cloth GoalNet0(40, 8, 0.25);
+PBD_Cloth GoalNet1(40, 16, 0.25);
 PBD_Cloth GoalNet2(8, 16, 0.25);
 PBD_Cloth GoalNet3(8, 16, 0.25);
 vector<PBD_Cloth*> GoalNetSet;
@@ -63,7 +63,7 @@ extern int motion_kicker;
 extern int motion_keeper;
 
 //Frame & TimeStep Setting	[MODEL]
-int      ModelFrameNumber = 0;					
+int      ModelFrameNumber = 0;
 int      ModelFrameNumber2 = 0;
 //Frame & TimeStep Setting	[CLOTH]
 float	 timeStep = 1.0f / 60.0f; //1.0/60.0f;
@@ -165,7 +165,7 @@ void scene(void) {
 	glEnd();
 
 
-	
+
 	//glEnable(GL_LIGHT0);
 	glDisable(GL_LIGHTING);
 	field.render();
@@ -242,7 +242,7 @@ void display()
 		(*it)->DrawCloth();;
 	}
 
-	for (Ball &ball : balls) {
+	for (Ball& ball : balls) {
 		ball.render();
 	}
 
@@ -267,17 +267,17 @@ void glut_idle(void) {
 	//ball.setPosition(ball.getPosition() + veltemp * timeStep);
 
 	//############# Ball movement ############
-	for (Ball &ball : balls) {
+	for (Ball& ball : balls) {
 		ball.updatePosition(timeStep);
 
 		ball.collideWithGround();
 	}
 
-	for (Ball &ball : balls) {
+	for (Ball& ball : balls) {
 		ball.collideWithBalls(balls);
 	}
-	
-	for (Ball &ball : balls) {
+
+	for (Ball& ball : balls) {
 		ball.applyChanges();
 	}
 	//############# Ball movement ############
@@ -285,8 +285,8 @@ void glut_idle(void) {
 	//############# LCJ CLOTH ###############
 	vector<Vector3f> moments;
 	//collisionResult momentum;
-	 
-	for (Ball &ball : balls) {
+
+	for (Ball& ball : balls) {
 		Vector3f total = Vector3f(0, 0, 0);
 		for (vector<PBD_Cloth*>::iterator it = GoalNetSet.begin(); it != GoalNetSet.end(); ++it)
 		{
@@ -308,7 +308,7 @@ void glut_idle(void) {
 	//	balls[i].updateVelocity(moments[i]);
 	//}
 
-	
+
 	//Sleep(5); //TODO
 
 		//############# JJH BVH motion ###############
@@ -366,7 +366,7 @@ void glut_idle(void) {
 	//float dt2 = animation_time2 - last_time2;
 
 	if (bvhObject2.ready) {
-		update_timer2 +=  time_scale2*  dt;
+		update_timer2 += time_scale2 * dt;
 		if ((ModelFrameNumber2 + 1) >= bvhObject2.nFrames) {
 			if (motion_keeper == 0 && motion_kicker == 1)
 			{
@@ -460,7 +460,7 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 		targetBall = -1;
 		break;
 	}
-	
+
 	glutPostRedisplay();
 }
 void init() {
@@ -520,9 +520,9 @@ void manual()
 	std::cout << "=========================================" << std::endl;
 }
 
-int main(int argc, const char **argv) {
+int main(int argc, const char** argv) {
 
-	glutInit(&argc, const_cast<char **>(argv));
+	glutInit(&argc, const_cast<char**>(argv));
 	glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
 	glutInitWindowSize(width, height);
 	glutInitWindowPosition(0, 0);
