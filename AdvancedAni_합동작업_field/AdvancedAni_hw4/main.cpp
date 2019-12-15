@@ -228,8 +228,8 @@ void display()
 	// display text
 	char messages[1][64];
 	if (bvhObject.ready) {
-		sprintf(messages[0], "Shoot :  's' key");
-		drawMessage(0, messages, 1);
+		//sprintf(messages[0], "Shoot :  's' key");
+		//drawMessage(0, messages, 1);
 	}
 	else {
 		sprintf(messages[0], "Start : 'i' key");
@@ -317,7 +317,7 @@ void glut_idle(void) {
 	float dt = animation_time - last_time;
 
 	if (bvhObject.ready) {
-		update_timer += time_scale * 2 * dt;
+		update_timer += time_scale * dt;
 		if ((ModelFrameNumber + 1) >= bvhObject.nFrames) {
 			if (motion_kicker == 0)
 			{
@@ -355,7 +355,7 @@ void glut_idle(void) {
 	}
 
 	if (bvhObject2.ready) {
-		update_timer2 += time_scale2 *10.0* dt;
+		update_timer2 +=  time_scale2*  dt;
 		if ((ModelFrameNumber2 + 1) >= bvhObject2.nFrames) {
 			if (motion_keeper == 0)
 			{
@@ -402,7 +402,7 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 	case 'i':
 		fileName = string("BVH_Data/kicker/1001_nohand_ready.bvh"); //kicker
 		ModelFrameNumber = 0;
-		//motion_kicker = 0;
+		motion_kicker = 0;
 		modelScale = 0.02f;
 		bvhObject.init(fileName);
 		time_scale = 0.6f; //bvh speed
@@ -411,6 +411,7 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 
 		fileName2 = string("BVH_Data/keeper/keeper_ready.bvh"); //keeper
 		ModelFrameNumber2 = 0;
+		motion_keeper = 0;
 		modelScale2 = 0.04f;
 		time_scale2 = 2.0f;//1.8f; //bvh speed
 
@@ -423,8 +424,8 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 
 		break;
 	case 's':
-		motion_kicker = 0;
-		motion_keeper = 0;
+		//motion_kicker = 0;
+		//motion_keeper = 0;
 
 		if (targetBall == -1) {
 			balls.emplace_back();

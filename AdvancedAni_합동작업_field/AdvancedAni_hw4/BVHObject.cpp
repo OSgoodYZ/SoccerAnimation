@@ -293,11 +293,14 @@ void BVHObject::renderJoint(Index joint, Pose pose, int frameNum) {
 		// if root, translate
 		switch (motion_kicker)
 		{
-		case 2:
 
-			pos_kicker_x = save_pose1[0] - save_pose2[0];
-			pos_kicker_y = save_pose1[1] - save_pose2[1];
-			pos_kicker_z = save_pose1[2] - save_pose2[2];
+		case 2: // kicker : shoot -> laugh // 
+			// shoot  : 52.248501 84.084000 -78.683701 ~ -14.738100 83.631500 73.672699
+			// laught : 5.366160 83.888298 12.487400 ~ -1.938170 82.343201 11.072800
+
+			pos_kicker_x = -14.738100 - 5.366160;//save_pose1[0] - save_pose2[0];
+			pos_kicker_y = 83.631500 - 83.888298; // save_pose1[1] - save_pose2[1];
+			pos_kicker_z = 73.672699 - 12.487400; //save_pose1[2] - save_pose2[2];
 			break;
 		}
 		glTranslated(pose[0] + pos_kicker_x, pose[1] + pos_kicker_y, pose[2] + pos_kicker_z);
@@ -671,18 +674,18 @@ void BVHObject2::renderJoint(Index joint, Pose pose, int frameNum) {
 		// if root, translate
 		switch (motion_keeper)
 		{
-		case -1:  //-4.8139 36.7156 -5.6347 ~ -10.0849 36.7335 -14.3680
+		case 0:  //-4.8139 36.7156 -5.6347 ~ -10.0849 36.7335 -14.3680
 			pos_keeper_z = 310;
 			break;
 		case 1: // 38.068699 36.393200 -5.382200  ~ 39.483398 36.247002 -3.139300
-			pos_keeper_x = -save_pose1[0] + save_pose2[0];
-			pos_keeper_y = -save_pose1[1] + save_pose2[1];
-			pos_keeper_z = -save_pose1[2] + save_pose2[2] + 310;
+			pos_keeper_x = 10.0849 + 38.068699;//-save_pose1[0] + save_pose2[0];
+			pos_keeper_y = -36.7335 + 36.393200;//-save_pose1[1] + save_pose2[1];
+			pos_keeper_z = 14.3680 - 5.382200 + 310;//-save_pose1[2] + save_pose2[2] + 310;
 			break;
 		case 2: // -4.562700 36.605099 -3.237100
-			pos_keeper_x = -save_pose1[0] + save_pose2[0] + 38.068699 + 10.0849;
-			pos_keeper_y = -save_pose1[1] + save_pose2[1];
-			pos_keeper_z = -save_pose1[2] + save_pose2[2] + 310;// +14.3680 - 5.382200;
+			pos_keeper_x = -39.483398 - 4.562700 + 10.0849 + 38.068699;;//-save_pose1[0] + save_pose2[0] + 38.068699 + 10.0849;
+			pos_keeper_y = -36.247002 + 36.605099 - 36.7335 + 36.393200;//-save_pose1[1] + save_pose2[1];
+			pos_keeper_z = 3.139300 - 4.562700 + 14.3680 - 5.382200 + 310; //-save_pose1[2] + save_pose2[2] + 310;// +14.3680 - 5.382200;
 			break;
 		}
 		glTranslated(-pose[0] + pos_keeper_x, pose[1] + pos_keeper_y, -pose[2] + pos_keeper_z); // root z rotation 180 degree
