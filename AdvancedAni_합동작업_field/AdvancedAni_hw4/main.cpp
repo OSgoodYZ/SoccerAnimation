@@ -32,7 +32,7 @@ BVHObject bvhObject;
 BVHObject2 bvhObject2;
 Field field;
 vector<Ball> balls;
-int targetBall;
+int targetBall = -1;
 PBD_Cloth GoalNet0(40,8,0.25);
 PBD_Cloth GoalNet1(40,16,0.25);
 PBD_Cloth GoalNet2(8, 16, 0.25);
@@ -419,24 +419,27 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 		bvhObject2.pose_save2(0);
 		bvhObject2.pose_save1(0);
 
-		balls.emplace_back();
-		targetBall = balls.size() - 1;
+		if (targetBall == -1) {
+			balls.emplace_back();
+			targetBall = balls.size() - 1;
+		}
 
 		break;
 	case 's':
 		//motion_kicker = 0;
 		//motion_keeper = 0;
 
-		if (targetBall == -1) {
+		/*if (targetBall == -1) {
 			balls.emplace_back();
 			targetBall = balls.size() - 1;
-		}
+		}*/
 		break;
 	case 't':
 		balls.emplace_back();
 		targetBall = balls.size() - 1;
 		balls[targetBall].setPosition(Vector3f(-0.7, 2, 15));
-		balls[targetBall].setVelocity(Vector3f(0, 0, 5));//7
+		balls[targetBall].setVelocity(Vector3f(0, 0, 15));//7
+		targetBall = -1;
 		break;
 	}
 	
