@@ -38,8 +38,9 @@ PBD_Cloth GoalNet1(40,16,0.25);
 PBD_Cloth GoalNet2(8, 16, 0.25);
 PBD_Cloth GoalNet3(8, 16, 0.25);
 vector<PBD_Cloth*> GoalNetSet;
-clock_t ani_start, ani_time;
+clock_t ani_start, ani_time, ani_start2, ani_time2;
 double  animation_time = 0.0f;
+double  animation_time2 = 0.0f;
 double  update_timer = 0.0f;
 double  update_timer2 = 0.0f;
 double time_scale = 1.0f;
@@ -319,13 +320,15 @@ void glut_idle(void) {
 	if (bvhObject.ready) {
 		update_timer += time_scale * dt;
 		if ((ModelFrameNumber + 1) >= bvhObject.nFrames) {
-			if (motion_kicker == 0)
+			if (motion_kicker == 0 && ModelFrameNumber2 == 693)
 			{
 				bvhObject.pose_save1(ModelFrameNumber);
 				fileName = string("BVH_Data/kicker/1001_nohand_shoot.bvh");
 				ModelFrameNumber = 0;
 				motion_kicker = 1;
-				time_scale = 1.5f; //bvh speed
+				time_scale = 1.2f; //bvh speed
+				//ani_start = clock();
+				//ani_time = ani_start;
 				bvhObject.init(fileName);
 				bvhObject.pose_save2(0);
 			}
@@ -336,6 +339,8 @@ void glut_idle(void) {
 				ModelFrameNumber = 0;
 				motion_kicker = 2;
 				time_scale = 1.8f; //bvh speed
+				//ani_start = clock();
+				//ani_time = ani_start;
 				bvhObject.init(fileName);
 				bvhObject.pose_save2(0);
 			}
@@ -344,7 +349,7 @@ void glut_idle(void) {
 		else if (update_timer > bvhObject.interval) {
 			ModelFrameNumber++;
 			if (motion_kicker == 1 && ModelFrameNumber == 222) {
-				balls[targetBall].setVelocity(Vector3f(3, 4, 8)); //1.5, 4, 8
+				balls[targetBall].setVelocity(Vector3f(0, 6, 8)); //1.5, 4, 8
 				targetBall = -1;
 			}
 			update_timer = 0;
@@ -354,16 +359,24 @@ void glut_idle(void) {
 		ModelFrameNumber = 0;
 	}
 
+
+	//ani_time2 = clock();
+	//float last_time2 = animation_time2;
+	//animation_time2 = (ani_time2 - ani_start2) / (float)CLOCKS_PER_SEC;
+	//float dt2 = animation_time2 - last_time2;
+
 	if (bvhObject2.ready) {
 		update_timer2 +=  time_scale2*  dt;
 		if ((ModelFrameNumber2 + 1) >= bvhObject2.nFrames) {
-			if (motion_keeper == 0)
+			if (motion_keeper == 0 && motion_kicker == 1)
 			{
 				bvhObject2.pose_save1(ModelFrameNumber2);
 				fileName2 = string("BVH_Data/keeper/keeper_blocking_reverse_short.bvh");
 				ModelFrameNumber2 = 0;
 				motion_keeper = 1;
-				time_scale2 = 2.0f; //bvh speed
+				time_scale2 = 2.09f; //bvh speed
+				//ani_start2 = clock();
+				//ani_time2 = ani_start2;
 				bvhObject2.init(fileName2);
 				bvhObject2.pose_save2(0);
 
@@ -374,7 +387,9 @@ void glut_idle(void) {
 				fileName2 = string("BVH_Data/keeper/keeper_ready2.bvh");
 				ModelFrameNumber2 = 0;
 				motion_keeper = 2;
-				time_scale2 = 1.8f; //bvh speed
+				time_scale2 = 1.6f; //bvh speed
+				//ani_start2 = clock();
+				//ani_time2 = ani_start2;
 				bvhObject2.init(fileName2);
 				bvhObject2.pose_save2(0);
 			}
@@ -404,8 +419,10 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 		ModelFrameNumber = 0;
 		motion_kicker = 0;
 		modelScale = 0.02f;
+		//ani_start = clock();
+		//ani_time = ani_start;
 		bvhObject.init(fileName);
-		time_scale = 0.6f; //bvh speed
+		time_scale = 0.78f; //bvh speed
 		bvhObject.pose_save2(0);
 		bvhObject.pose_save1(0);
 
@@ -414,7 +431,8 @@ void keyboardCB(unsigned char keyPressed, int x, int y)
 		motion_keeper = 0;
 		modelScale2 = 0.04f;
 		time_scale2 = 2.0f;//1.8f; //bvh speed
-
+		//ani_start2 = clock();
+		//ani_time2 = ani_start2;
 		bvhObject2.init(fileName2);
 		bvhObject2.pose_save2(0);
 		bvhObject2.pose_save1(0);
@@ -482,6 +500,8 @@ void init() {
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
 
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+	ani_start = clock();
+	ani_start2 = clock();
 }
 void manual()
 {
